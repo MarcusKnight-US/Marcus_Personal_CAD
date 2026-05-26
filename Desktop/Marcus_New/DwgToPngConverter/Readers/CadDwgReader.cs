@@ -20,6 +20,17 @@ namespace DwgToPngConverter.Readers
             {
                 if (entity != null)
                 {
+                    if (entity is Spline spline && (spline.ControlPoints == null || spline.ControlPoints.Count == 0) && spline.FitPoints != null && spline.FitPoints.Count > 0)
+                    {
+                        try
+                        {
+                            spline.UpdateFromFitPoints();
+                        }
+                        catch (System.Exception ex)
+                        {
+                            System.Console.WriteLine($"Warning: Failed to update spline from fit points: {ex.Message}");
+                        }
+                    }
                     entities.Add(entity);
                 }
             }

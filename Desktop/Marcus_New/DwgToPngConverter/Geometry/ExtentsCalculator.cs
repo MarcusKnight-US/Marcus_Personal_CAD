@@ -43,8 +43,48 @@ namespace DwgToPngConverter.Geometry
                 return true;
             }
 
+            if (entity is Arc arc)
+            {
+                extents = GetArcExtents(arc);
+                return true;
+            }
+
             extents = default;
             return false;
+        }
+
+        private static Extents GetArcExtents(Arc arc)
+        {
+            var startX = arc.Center.X + arc.Radius * Math.Cos(arc.StartAngle);
+            var startY = arc.Center.Y + arc.Radius * Math.Sin(arc.StartAngle);
+            var endX = arc.Center.X + arc.Radius * Math.Cos(arc.EndAngle);
+            var endY = arc.Center.Y + arc.Radius * Math.Sin(arc.EndAngle);
+
+            var extents = new Extents(
+                Math.Min(startX, endX),
+                Math.Min(startY, endY),
+                Math.Max(startX, endX),
+                Math.Max(startY, endY)
+            );
+
+            var sweep = arc.EndAngle - arc.StartAngle;
+            if (sweep < 0)
+            {
+                sweep += Math.PI * 2;
+            }
+
+            var cardinalAngles = new[] { 0.0, Math.PI / 2.0, Math.PI, Math.PI * 3.0 / 2.0 };
+            foreach (var angle in cardinalAngles)
+            {
+                if (ArcContainsAngle(arc.StartAngle, sweep, angle))
+                {
+                    var px = arc.Center.X + arc.Radius * Math.Cos(angle);
+                    var py = arc.Center.Y + arc.Radius * Math.Sin(angle);
+                    extents = AddExtents(extents, new Extents(px, py, px, py));
+                }
+            }
+
+            return extents;
         }
 
         private static Extents GetSplineExtents(Spline spline)
