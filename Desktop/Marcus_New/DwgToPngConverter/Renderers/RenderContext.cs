@@ -23,5 +23,23 @@ namespace DwgToPngConverter.Renderers
             Height = height;
             Paint = paint;
         }
+
+        public SKPoint ToScreenPoint(double x, double y)
+        {
+            return new SKPoint(
+                TransformService.TransformX(x, BoundingBox.MinX, Scale, OffsetX),
+                TransformService.TransformY(y, BoundingBox.MinY, Scale, OffsetY, Height)
+            );
+        }
+
+        public SKPoint ToScreenPoint(CSMath.XY point)
+        {
+            return ToScreenPoint(point.X, point.Y);
+        }
+
+        public SKPoint ToScreenPoint(CSMath.XYZ point)
+        {
+            return ToScreenPoint(point.X, point.Y);
+        }
     }
 }

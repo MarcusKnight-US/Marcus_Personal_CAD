@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "oGwVx8PFONo=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\BRG\\Desktop\\Marcus_New\\InspectLwPolyline\\InspectLwPolyline.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\BRG\\.nuget\\packages\\acadsharp\\3.6.12\\acadsharp.3.6.12.nupkg.sha512"
+  ],
+  "logs": []
+}

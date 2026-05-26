@@ -9,11 +9,6 @@ namespace DwgToPngConverter.Renderers
     {
         public Type EntityType => typeof(T);
 
-        public bool CanRender(Entity entity)
-        {
-            return entity is T;
-        }
-
         public void Draw(RenderContext context, Entity entity)
         {
             if (entity is T typedEntity)

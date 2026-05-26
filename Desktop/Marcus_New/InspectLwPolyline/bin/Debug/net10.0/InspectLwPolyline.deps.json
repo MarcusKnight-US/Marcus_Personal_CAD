@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "InspectLwPolyline/1.0.0": {
+        "dependencies": {
+          "ACadSharp": "3.6.12"
+        },
+        "runtime": {
+          "InspectLwPolyline.dll": {}
+        }
+      },
+      "ACadSharp/3.6.12": {
+        "runtime": {
+          "lib/net9.0/ACadSharp.dll": {
+            "assemblyVersion": "3.6.12.0",
+            "fileVersion": "3.6.12.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "InspectLwPolyline/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ACadSharp/3.6.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-tbbEKU0b0fbVuuKC6qEi3jWJigbO8ZVI8QbNFvfPKt8/y0dCyNNzWnaghfst4Mv+7Xq4LOWpsylVafrJsg3X7A==",
+      "path": "acadsharp/3.6.12",
+      "hashPath": "acadsharp.3.6.12.nupkg.sha512"
+    }
+  }
+}

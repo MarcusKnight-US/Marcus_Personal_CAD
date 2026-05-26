@@ -20,7 +20,8 @@ namespace DwgToPngConverter.Renderers
                 new LineRenderer(),
                 new CircleRenderer(),
                 new ArcRenderer(),
-                new PolylineRenderer()
+                new PolylineRenderer(),
+                new SplineRenderer()
             };
 
             _rendererMap = renderers.ToDictionary(renderer => renderer.EntityType);
