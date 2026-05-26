@@ -16,7 +16,7 @@ namespace DwgToPngConverter.Renderers
             double sweep = arc.EndAngle - arc.StartAngle;
             if (sweep < 0)
             {
-                sweep += Math.PI * 2;
+                sweep += Math.Tau;
             }
 
             // Since our screen coordinates invert the Y-axis (Y goes down),

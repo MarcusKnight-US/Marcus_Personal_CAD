@@ -12,8 +12,9 @@ namespace DwgToPngConverter.Renderers
         public float OffsetY { get; }
         public int Height { get; }
         public SKPaint Paint { get; }
+        public string? DwgFilePath { get; }
 
-        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint)
+        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, string? dwgFilePath = null)
         {
             Canvas = canvas;
             BoundingBox = bbox;
@@ -22,6 +23,7 @@ namespace DwgToPngConverter.Renderers
             OffsetY = offsetY;
             Height = height;
             Paint = paint;
+            DwgFilePath = dwgFilePath;
         }
 
         public SKPoint ToScreenPoint(double x, double y)

@@ -1,0 +1,4 @@
+C:\Users\BRG\Desktop\Marcus_New\DwgToPngConverter\bin\Debug\net10.0\win-x64\publish\DwgToPngConverter.pdb
+C:\Users\BRG\Desktop\Marcus_New\DwgToPngConverter\bin\Debug\net10.0\win-x64\publish\libSkiaSharp.dll
+C:\Users\BRG\Desktop\Marcus_New\DwgToPngConverter\bin\Debug\net10.0\win-x64\publish\libSkiaSharp.pdb
+C:\Users\BRG\Desktop\Marcus_New\DwgToPngConverter\bin\Debug\net10.0\win-x64\publish\DwgToPngConverter.exe

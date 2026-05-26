@@ -40,21 +40,17 @@ namespace DwgToPngConverter.Renderers
                 return;
             }
 
-            foreach (var point in GetArcPoints(startVertex.Location, endVertex.Location, startVertex.Bulge, context))
-            {
-                path.LineTo(point);
-            }
-        }
+            var start = startVertex.Location;
+            var end = endVertex.Location;
+            var bulge = startVertex.Bulge;
 
-        private static IEnumerable<SKPoint> GetArcPoints(CSMath.XY start, CSMath.XY end, double bulge, RenderContext context)
-        {
             var dx = end.X - start.X;
             var dy = end.Y - start.Y;
             var chordLength = Math.Sqrt(dx * dx + dy * dy);
             if (chordLength <= double.Epsilon)
             {
-                yield return context.ToScreenPoint(end);
-                yield break;
+                path.LineTo(context.ToScreenPoint(end));
+                return;
             }
 
             var theta = 4 * Math.Atan(bulge);
@@ -77,11 +73,11 @@ namespace DwgToPngConverter.Renderers
             var sweep = endAngle - startAngle;
             if (bulge > 0 && sweep < 0)
             {
-                sweep += Math.PI * 2;
+                sweep += Math.Tau;
             }
             else if (bulge < 0 && sweep > 0)
             {
-                sweep -= Math.PI * 2;
+                sweep -= Math.Tau;
             }
 
             int steps = Math.Max(6, (int)Math.Ceiling(Math.Abs(sweep) * 180.0 / Math.PI / 10.0));
@@ -90,10 +86,10 @@ namespace DwgToPngConverter.Renderers
                 var angle = startAngle + sweep * i / steps;
                 var worldX = centerX + radius * Math.Cos(angle);
                 var worldY = centerY + radius * Math.Sin(angle);
-                yield return context.ToScreenPoint(new CSMath.XY(worldX, worldY));
+                path.LineTo(context.ToScreenPoint(new CSMath.XY(worldX, worldY)));
             }
 
-            yield return context.ToScreenPoint(end);
+            path.LineTo(context.ToScreenPoint(end));
         }
     }
 }
