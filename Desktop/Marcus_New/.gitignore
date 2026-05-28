@@ -1,0 +1,60 @@
+## C# / .NET
+
+# Build output
+bin/
+obj/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# MSBuild
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Publish
+**/publish/
+**/PublishScripts/
+
+# ReSharper
+.idea/
+*.DotSettings.user
+
+# Rider
+.idea/
+
+## Visual Studio / VS Code
+
+.vscode/
+.vs/
+*.rsuser
+*.suo
+*.user
+*.vsp
+*.vspscc
+*.vssscc
+
+## OS files
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Project-specific
+
+run_output.txt
+.VSCodeCounter/
