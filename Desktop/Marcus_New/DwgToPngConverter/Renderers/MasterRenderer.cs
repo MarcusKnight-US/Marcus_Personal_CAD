@@ -332,9 +332,7 @@ namespace DwgToPngConverter.Renderers
                     // 7a. Draw Viewport Boundary (if viewport outline is visible)
                     bool borderIsVisible = !vp.IsInvisible;
                     if (vp.Layer != null && !vp.Layer.IsOn)
-                    {
                         borderIsVisible = false;
-                    }
 
                     if (borderIsVisible)
                     {
@@ -348,11 +346,33 @@ namespace DwgToPngConverter.Renderers
                         canvas.DrawRect(screenClipRect, borderPaint);
                     }
 
-                    // 7b. Clip and render model space entities
+                    // 7b. Determine the model-space context for this viewport.
+                    //     Check whether the viewport's view window overlaps the model bounding box.
+                    //     If it doesn't (ViewCenter/ViewTarget not in model-space units), fall back to
+                    //     a zoom-to-extents render that maps the whole model bbox into the viewport rect.
+                    RenderContext modelContext;
+                    if (modelScene.BoundingBox.IsEmpty)
+                    {
+                        canvas.Save();
+                        canvas.Restore();
+                        continue;
+                    }
+
+                    bool useZoomToExtents = !ViewportOverlapsModelBBox(vp, modelScene.BoundingBox);
+                    if (useZoomToExtents)
+                    {
+                        // Build a context that maps the model bbox into the screen clip rect directly.
+                        modelContext = BuildZoomToExtentsContext(canvas, modelScene.BoundingBox,
+                            screenClipRect, paint, dwgFilePath);
+                    }
+                    else
+                    {
+                        modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, vp);
+                    }
+
+                    // 7c. Clip and render model space entities
                     canvas.Save();
                     canvas.ClipRect(screenClipRect);
-
-                    var modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, vp);
 
                     foreach (var mEntity in modelScene.Entities)
                     {
@@ -380,6 +400,55 @@ namespace DwgToPngConverter.Renderers
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
             using var stream = File.OpenWrite(outputPath);
             data.SaveTo(stream);
+        }
+
+        /// <summary>
+        /// Returns true if the viewport's view window (in model coordinates) overlaps the model bounding box.
+        /// ViewCenter is the model-space point at the center of the viewport; ViewTarget offsets the DCS origin.
+        /// </summary>
+        private static bool ViewportOverlapsModelBBox(Viewport vp, BoundingBox modelBBox)
+        {
+            if (vp.ScaleFactor <= 0) return false;
+
+            // Compute the model-space rectangle visible through this viewport
+            double modelCenterX = vp.ViewTarget.X + vp.ViewCenter.X;
+            double modelCenterY = vp.ViewTarget.Y + vp.ViewCenter.Y;
+            double halfW = (vp.Width  / 2.0) / vp.ScaleFactor;
+            double halfH = (vp.Height / 2.0) / vp.ScaleFactor;
+
+            double vpMinX = modelCenterX - halfW;
+            double vpMaxX = modelCenterX + halfW;
+            double vpMinY = modelCenterY - halfH;
+            double vpMaxY = modelCenterY + halfH;
+
+            // Rectangle intersection test
+            return vpMaxX >= modelBBox.MinX && vpMinX <= modelBBox.MaxX &&
+                   vpMaxY >= modelBBox.MinY && vpMinY <= modelBBox.MaxY;
+        }
+
+        /// <summary>
+        /// Builds a RenderContext that fits the entire model bounding box into the given screen rectangle
+        /// (zoom-to-extents fallback when the viewport camera doesn't align with model coordinates).
+        /// </summary>
+        private static RenderContext BuildZoomToExtentsContext(SKCanvas canvas, BoundingBox modelBBox,
+            SKRect screenRect, SKPaint paint, string? dwgFilePath)
+        {
+            float screenW = screenRect.Width;
+            float screenH = screenRect.Height;
+
+            float scaleX = screenW / (float)modelBBox.Width;
+            float scaleY = screenH / (float)modelBBox.Height;
+            float fitScale = Math.Min(scaleX, scaleY) * 0.95f;   // 5% inner margin
+
+            float offsetX = screenRect.Left + (screenW - (float)modelBBox.Width  * fitScale) / 2f;
+            float offsetY = screenRect.Top  + (screenH - (float)modelBBox.Height * fitScale) / 2f;
+
+            // We pass height = total canvas height so TransformY flips correctly
+            int canvasHeight = (int)canvas.DeviceClipBounds.Height;
+            if (canvasHeight <= 0) canvasHeight = (int)screenRect.Bottom;
+
+            return new RenderContext(canvas, modelBBox, fitScale, offsetX, offsetY,
+                canvasHeight, paint, dwgFilePath, activeViewport: null);
         }
 
         public static bool TryParseHexColor(string hex, out SKColor color)
