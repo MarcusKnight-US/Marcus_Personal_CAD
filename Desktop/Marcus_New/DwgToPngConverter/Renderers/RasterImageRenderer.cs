@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Concurrent;
 using SkiaSharp;
 using ACadSharp.Entities;
 using DwgToPngConverter.Geometry;
@@ -8,6 +9,22 @@ namespace DwgToPngConverter.Renderers
 {
     public class RasterImageRenderer : EntityRenderer<RasterImage>
     {
+        private class CachedImage
+        {
+            public SKImage Image { get; }
+            public int Width { get; }
+            public int Height { get; }
+
+            public CachedImage(SKImage image, int w, int h)
+            {
+                Image = image;
+                Width = w;
+                Height = h;
+            }
+        }
+
+        private static readonly ConcurrentDictionary<string, CachedImage> _imageCache = new();
+
         protected override void Draw(RenderContext context, RasterImage rasterImage)
         {
             if (rasterImage.Definition == null)
@@ -18,28 +35,50 @@ namespace DwgToPngConverter.Renderers
             string? resolvedPath = null;
             if (!string.IsNullOrEmpty(rasterImage.Definition.FileName))
             {
+                // 1. Try absolute or direct relative path as is
                 if (File.Exists(rasterImage.Definition.FileName))
                 {
                     resolvedPath = rasterImage.Definition.FileName;
                 }
                 else
                 {
-                    string fileName = Path.GetFileName(rasterImage.Definition.FileName);
+                    // 2. Try resolving the entire relative path relative to the DWG file directory
                     if (!string.IsNullOrEmpty(context.DwgFilePath))
                     {
                         string? dwgDir = Path.GetDirectoryName(context.DwgFilePath);
                         if (!string.IsNullOrEmpty(dwgDir))
                         {
-                            string candidate = Path.Combine(dwgDir, fileName);
-                            if (File.Exists(candidate))
+                            try
                             {
-                                resolvedPath = candidate;
+                                string candidateRelative = Path.GetFullPath(Path.Combine(dwgDir, rasterImage.Definition.FileName));
+                                if (File.Exists(candidateRelative))
+                                {
+                                    resolvedPath = candidateRelative;
+                                }
+                            }
+                            catch {}
+                        }
+                    }
+
+                    // 3. Fallback: try resolving just the filename in the same directory as the DWG file
+                    if (resolvedPath == null && !string.IsNullOrEmpty(context.DwgFilePath))
+                    {
+                        string? dwgDir = Path.GetDirectoryName(context.DwgFilePath);
+                        if (!string.IsNullOrEmpty(dwgDir))
+                        {
+                            string fileName = Path.GetFileName(rasterImage.Definition.FileName);
+                            string candidateNameOnly = Path.Combine(dwgDir, fileName);
+                            if (File.Exists(candidateNameOnly))
+                            {
+                                resolvedPath = candidateNameOnly;
                             }
                         }
                     }
 
+                    // 4. Fallback: try resolving just the filename in the current working directory
                     if (resolvedPath == null)
                     {
+                        string fileName = Path.GetFileName(rasterImage.Definition.FileName);
                         if (File.Exists(fileName))
                         {
                             resolvedPath = fileName;
@@ -54,17 +93,39 @@ namespace DwgToPngConverter.Renderers
                 return;
             }
 
-            try
+            // Look up or populate decoded image from static cache to eliminate repeated disk reads & decodes
+            if (!_imageCache.TryGetValue(resolvedPath, out var cached))
             {
-                using var bitmap = SKBitmap.Decode(resolvedPath);
-                if (bitmap == null)
+                try
                 {
-                    Console.WriteLine($"Warning: Failed to decode image from '{resolvedPath}'");
+                    using var bitmap = SKBitmap.Decode(resolvedPath);
+                    if (bitmap == null)
+                    {
+                        Console.WriteLine($"Warning: Failed to decode image from '{resolvedPath}'");
+                        return;
+                    }
+
+                    var image = SKImage.FromBitmap(bitmap);
+                    if (image == null)
+                    {
+                        Console.WriteLine($"Warning: Failed to create SKImage from bitmap for '{resolvedPath}'");
+                        return;
+                    }
+
+                    cached = new CachedImage(image, bitmap.Width, bitmap.Height);
+                    _imageCache[resolvedPath] = cached;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error decoding raster image from '{resolvedPath}': {ex.Message}");
                     return;
                 }
+            }
 
-                int w = bitmap.Width;
-                int h = bitmap.Height;
+            try
+            {
+                int w = cached.Width;
+                int h = cached.Height;
 
                 // Affine transformation coefficients from local image space (lx, ly) to screen space (sx, sy)
                 // sx = A * lx + B * ly + C
@@ -101,17 +162,13 @@ namespace DwgToPngConverter.Renderers
                     IsAntialias = true
                 };
 
-                using var image = SKImage.FromBitmap(bitmap);
-                if (image != null)
-                {
-                    context.Canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
-                }
+                context.Canvas.DrawImage(cached.Image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
 
                 context.Canvas.Restore();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error rendering raster image from '{resolvedPath}': {ex.Message}");
+                Console.WriteLine($"Error rendering cached raster image from '{resolvedPath}': {ex.Message}");
             }
         }
     }

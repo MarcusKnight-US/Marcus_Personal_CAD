@@ -10,6 +10,20 @@ namespace DwgToPngConverter.Geometry
         // TryGetExtents computes min/max bounds for supported entity types.
         public static bool TryGetExtents(Entity entity, out Extents extents)
         {
+            if (entity == null)
+            {
+                extents = default;
+                return false;
+            }
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            bool result = TryGetExtentsInternal(entity, out extents);
+            sw.Stop();
+            PerformanceTracker.RecordExtents(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+            return result;
+        }
+
+        private static bool TryGetExtentsInternal(Entity entity, out Extents extents)
+        {
             if (entity is Line line)
             {
                 extents = new Extents(
@@ -103,25 +117,127 @@ namespace DwgToPngConverter.Geometry
                 return true;
             }
 
+            if (entity is Hatch hatch)
+            {
+                extents = GetHatchExtents(hatch);
+                return true;
+            }
+
+            if (entity is Point point)
+            {
+                extents = new Extents(point.Location.X, point.Location.Y, point.Location.X, point.Location.Y);
+                return true;
+            }
+
             extents = default;
             return false;
         }
 
-        private static Extents GetEllipseExtents(Ellipse ellipse)
+        private static Extents GetHatchExtents(Hatch hatch)
         {
-            var points = ellipse.PolygonalVertexes(64);
-            if (points == null || points.Count == 0)
+            if (hatch.Paths == null || hatch.Paths.Count == 0)
             {
                 return default;
             }
 
-            var extents = new Extents(points[0].X, points[0].Y, points[0].X, points[0].Y);
-            for (int i = 1; i < points.Count; i++)
+            bool hasExtents = false;
+            Extents extents = default;
+
+            foreach (var path in hatch.Paths)
             {
-                extents = AddExtents(extents, new Extents(points[i].X, points[i].Y, points[i].X, points[i].Y));
+                if (path == null) continue;
+
+                // 1. Process Edges
+                if (path.Edges != null && path.Edges.Count > 0)
+                {
+                    foreach (var edge in path.Edges)
+                    {
+                        if (edge == null) continue;
+
+                        if (edge is Hatch.BoundaryPath.Line lineEdge)
+                        {
+                            var segmentExtents = new Extents(
+                                Math.Min(lineEdge.Start.X, lineEdge.End.X),
+                                Math.Min(lineEdge.Start.Y, lineEdge.End.Y),
+                                Math.Max(lineEdge.Start.X, lineEdge.End.X),
+                                Math.Max(lineEdge.Start.Y, lineEdge.End.Y)
+                            );
+                            extents = hasExtents ? AddExtents(extents, segmentExtents) : segmentExtents;
+                            hasExtents = true;
+                        }
+                        else if (edge is Hatch.BoundaryPath.Arc arcEdge)
+                        {
+                            var segmentExtents = new Extents(
+                                arcEdge.Center.X - arcEdge.Radius,
+                                arcEdge.Center.Y - arcEdge.Radius,
+                                arcEdge.Center.X + arcEdge.Radius,
+                                arcEdge.Center.Y + arcEdge.Radius
+                            );
+                            extents = hasExtents ? AddExtents(extents, segmentExtents) : segmentExtents;
+                            hasExtents = true;
+                        }
+                        else if (edge is Hatch.BoundaryPath.Polyline polyEdge && polyEdge.Vertices != null)
+                        {
+                            foreach (var v in polyEdge.Vertices)
+                            {
+                                var ptExtents = new Extents(v.X, v.Y, v.X, v.Y);
+                                extents = hasExtents ? AddExtents(extents, ptExtents) : ptExtents;
+                                hasExtents = true;
+                            }
+                        }
+                        else if (edge is Hatch.BoundaryPath.Ellipse ellEdge)
+                        {
+                            var segmentExtents = new Extents(
+                                ellEdge.Center.X - ellEdge.MajorAxis,
+                                ellEdge.Center.Y - ellEdge.MajorAxis,
+                                ellEdge.Center.X + ellEdge.MajorAxis,
+                                ellEdge.Center.Y + ellEdge.MajorAxis
+                            );
+                            extents = hasExtents ? AddExtents(extents, segmentExtents) : segmentExtents;
+                            hasExtents = true;
+                        }
+                        else if (edge is Hatch.BoundaryPath.Spline splineEdge && splineEdge.ControlPoints != null)
+                        {
+                            foreach (var cp in splineEdge.ControlPoints)
+                            {
+                                var ptExtents = new Extents(cp.X, cp.Y, cp.X, cp.Y);
+                                extents = hasExtents ? AddExtents(extents, ptExtents) : ptExtents;
+                                hasExtents = true;
+                            }
+                        }
+                    }
+                }
+
+                // 2. Process Entities
+                if (path.Entities != null && path.Entities.Count > 0)
+                {
+                    foreach (var subEntity in path.Entities)
+                    {
+                        if (subEntity != null && TryGetExtents(subEntity, out var subExtents))
+                        {
+                            extents = hasExtents ? AddExtents(extents, subExtents) : subExtents;
+                            hasExtents = true;
+                        }
+                    }
+                }
             }
 
             return extents;
+        }
+
+        private static Extents GetEllipseExtents(Ellipse ellipse)
+        {
+            double cx = ellipse.Center.X;
+            double cy = ellipse.Center.Y;
+            double mx = ellipse.MajorAxisEndPoint.X;
+            double my = ellipse.MajorAxisEndPoint.Y;
+            double r = ellipse.RadiusRatio;
+
+            // Closed-form O(1) mathematically exact tight bounding box for the ellipse
+            double dx = Math.Sqrt(mx * mx + (my * r) * (my * r));
+            double dy = Math.Sqrt(my * my + (mx * r) * (mx * r));
+
+            return new Extents(cx - dx, cy - dy, cx + dx, cy + dy);
         }
 
         private static Extents GetArcExtents(Arc arc)
@@ -160,40 +276,51 @@ namespace DwgToPngConverter.Geometry
 
         private static Extents GetSplineExtents(Spline spline)
         {
-            var points = GetSplineSamplePoints(spline, 64);
-            if (points == null || points.Count == 0)
+            // O(N) convex hull of control points/fit points. In B-splines, the curve is mathematically
+            // guaranteed to lie inside the convex hull of its control points, making this extremely fast and robust.
+            if ((spline.ControlPoints == null || spline.ControlPoints.Count == 0) &&
+                (spline.FitPoints == null || spline.FitPoints.Count == 0))
             {
                 return default;
             }
 
-            var extents = new Extents(points[0].X, points[0].Y, points[0].X, points[0].Y);
-            for (int i = 1; i < points.Count; i++)
-            {
-                extents = AddExtents(extents, new Extents(points[i].X, points[i].Y, points[i].X, points[i].Y));
-            }
+            double minX = double.MaxValue;
+            double minY = double.MaxValue;
+            double maxX = double.MinValue;
+            double maxY = double.MinValue;
 
-            return extents;
-        }
+            bool hasPoints = false;
 
-        private static List<CSMath.XYZ> GetSplineSamplePoints(Spline spline, int precision)
-        {
-            precision = Math.Max(2, precision);
-            if (spline.TryPolygonalVertexes(precision, out var points) && points.Count > 1)
+            if (spline.ControlPoints != null && spline.ControlPoints.Count > 0)
             {
-                return points;
-            }
-
-            points = new List<CSMath.XYZ>(precision + 1);
-            for (int i = 0; i <= precision; i++)
-            {
-                var t = (double)i / precision;
-                if (spline.TryPointOnSpline(t, out var position))
+                foreach (var cp in spline.ControlPoints)
                 {
-                    points.Add(position);
+                    if (cp.X < minX) minX = cp.X;
+                    if (cp.Y < minY) minY = cp.Y;
+                    if (cp.X > maxX) maxX = cp.X;
+                    if (cp.Y > maxY) maxY = cp.Y;
+                    hasPoints = true;
                 }
             }
 
-            return points;
+            if (spline.FitPoints != null && spline.FitPoints.Count > 0)
+            {
+                foreach (var fp in spline.FitPoints)
+                {
+                    if (fp.X < minX) minX = fp.X;
+                    if (fp.Y < minY) minY = fp.Y;
+                    if (fp.X > maxX) maxX = fp.X;
+                    if (fp.Y > maxY) maxY = fp.Y;
+                    hasPoints = true;
+                }
+            }
+
+            if (!hasPoints)
+            {
+                return default;
+            }
+
+            return new Extents(minX, minY, maxX, maxY);
         }
 
         private static Extents GetPolylineExtents(LwPolyline polyline)

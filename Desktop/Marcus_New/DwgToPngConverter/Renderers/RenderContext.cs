@@ -1,4 +1,5 @@
 using SkiaSharp;
+using ACadSharp.Entities;
 using DwgToPngConverter.Geometry;
 
 namespace DwgToPngConverter.Renderers
@@ -13,8 +14,11 @@ namespace DwgToPngConverter.Renderers
         public int Height { get; }
         public SKPaint Paint { get; }
         public string? DwgFilePath { get; }
+        public Viewport? ActiveViewport { get; }
 
-        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, string? dwgFilePath = null)
+        public float EffectiveScale => Scale * (ActiveViewport != null ? (float)ActiveViewport.ScaleFactor : 1f);
+
+        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, string? dwgFilePath = null, Viewport? activeViewport = null)
         {
             Canvas = canvas;
             BoundingBox = bbox;
@@ -24,10 +28,23 @@ namespace DwgToPngConverter.Renderers
             Height = height;
             Paint = paint;
             DwgFilePath = dwgFilePath;
+            ActiveViewport = activeViewport;
         }
 
         public SKPoint ToScreenPoint(double x, double y)
         {
+            if (ActiveViewport != null)
+            {
+                var vp = ActiveViewport;
+                double dx = x - vp.ViewTarget.X;
+                double dy = y - vp.ViewTarget.Y;
+                double px = vp.Center.X + (dx - vp.ViewCenter.X) * vp.ScaleFactor;
+                double py = vp.Center.Y + (dy - vp.ViewCenter.Y) * vp.ScaleFactor;
+                return new SKPoint(
+                    TransformService.TransformX(px, BoundingBox.MinX, Scale, OffsetX),
+                    TransformService.TransformY(py, BoundingBox.MinY, Scale, OffsetY, Height)
+                );
+            }
             return new SKPoint(
                 TransformService.TransformX(x, BoundingBox.MinX, Scale, OffsetX),
                 TransformService.TransformY(y, BoundingBox.MinY, Scale, OffsetY, Height)

@@ -10,10 +10,15 @@ namespace DwgToPngConverter.Readers
         // ReadAll loads the DWG file and returns every entity object found.
         public List<Entity> ReadAll(string path)
         {
-            var entities = new List<Entity>();
-
             // Load DWG file from disk using ACadSharp.
             var doc = DwgReader.Read(path, null);
+            return ReadAll(doc);
+        }
+
+        // ReadAll returns every entity object found in the already-loaded CadDocument.
+        public List<Entity> ReadAll(CadDocument doc)
+        {
+            var entities = new List<Entity>();
 
             // Iterate through all model-space entities and collect them.
             foreach (var entity in doc.Entities)

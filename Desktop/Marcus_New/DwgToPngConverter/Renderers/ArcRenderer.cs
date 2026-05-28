@@ -10,7 +10,7 @@ namespace DwgToPngConverter.Renderers
         protected override void Draw(RenderContext context, Arc arc)
         {
             var center = context.ToScreenPoint(arc.Center);
-            var radius = (float)(arc.Radius * context.Scale);
+            var radius = (float)(arc.Radius * context.EffectiveScale);
             var oval = new SKRect(center.X - radius, center.Y - radius, center.X + radius, center.Y + radius);
             // In CAD, arcs always sweep CCW from StartAngle to EndAngle.
             double sweep = arc.EndAngle - arc.StartAngle;

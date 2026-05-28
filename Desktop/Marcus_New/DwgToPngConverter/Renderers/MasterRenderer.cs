@@ -5,6 +5,7 @@ using System.Linq;
 using SkiaSharp;
 using ACadSharp;
 using ACadSharp.Entities;
+using ACadSharp.Objects;
 using DwgToPngConverter.Geometry;
 
 namespace DwgToPngConverter.Renderers
@@ -15,7 +16,7 @@ namespace DwgToPngConverter.Renderers
         private readonly List<IEntityRenderer> _rendererFallback = new();
         private readonly Dictionary<Type, IEntityRenderer?> _resolvedRendererCache = new();
 
-        public float OverallLineWeight { get; set; } = 4f;
+        public float OverallLineWeight { get; set; } = 1f;
         public string BackgroundColorHex { get; set; } = "#FFFFFF";
 
         public MasterRenderer()
@@ -30,6 +31,8 @@ namespace DwgToPngConverter.Renderers
             RegisterRenderer(new MTextRenderer());
             RegisterRenderer(new SolidRenderer());
             RegisterRenderer(new RasterImageRenderer());
+            RegisterRenderer(new HatchRenderer());
+            RegisterRenderer(new PointRenderer());
         }
 
         public void RegisterRenderer(IEntityRenderer renderer)
@@ -102,6 +105,8 @@ namespace DwgToPngConverter.Renderers
                     continue;
                 }
 
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
                 paint.Color = ResolveSKColor(entity, backgroundColor);
                 
                 float resolvedWeight = ResolveLineWeightValue(entity);
@@ -109,6 +114,9 @@ namespace DwgToPngConverter.Renderers
 
                 var renderer = FindRenderer(entity);
                 renderer?.Draw(context, entity);
+
+                sw.Stop();
+                PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
             }
 
             using var image = surface.Snapshot();
@@ -215,6 +223,163 @@ namespace DwgToPngConverter.Renderers
             }
 
             return resultColor;
+        }
+
+        public void RenderLayout(CadDocument doc, Layout layout, string outputPath, string? dwgFilePath = null)
+        {
+            DwgToPngConverter.Scene.CadScene.SheetNumber = null;
+
+            if (layout == null || layout.AssociatedBlock == null)
+            {
+                Console.WriteLine("Warning: Invalid layout or layout associated block is null.");
+                return;
+            }
+
+            // 1. Explode paper space entities
+            var paperScene = new DwgToPngConverter.Scene.CadScene();
+            paperScene.AddEntities(layout.AssociatedBlock.Entities);
+
+            // 2. Explode model space entities
+            var modelScene = new DwgToPngConverter.Scene.CadScene();
+            modelScene.AddEntities(doc.Entities);
+
+            // 3. Find paper bounds via Viewport with Id == 1
+            BoundingBox paperBBox = null;
+            var mainVp = paperScene.Entities.OfType<Viewport>().FirstOrDefault(v => v.Id == 1);
+            if (mainVp != null)
+            {
+                paperBBox = new BoundingBox();
+                paperBBox.MinX = mainVp.Center.X - mainVp.Width / 2;
+                paperBBox.MaxX = mainVp.Center.X + mainVp.Width / 2;
+                paperBBox.MinY = mainVp.Center.Y - mainVp.Height / 2;
+                paperBBox.MaxY = mainVp.Center.Y + mainVp.Height / 2;
+            }
+            else
+            {
+                paperBBox = paperScene.BoundingBox;
+            }
+
+            if (paperBBox.IsEmpty || paperBBox.Width == 0 || paperBBox.Height == 0)
+            {
+                Console.WriteLine("Warning: Paper space bounding box has zero width or height.");
+                return;
+            }
+
+            // 4. Set size to preserve aspect ratio of the sheet
+            int width = 2400; // premium large resolution
+            int height = (int)Math.Round(width * (paperBBox.Height / paperBBox.Width));
+
+            float scaleX = width / (float)paperBBox.Width;
+            float scaleY = height / (float)paperBBox.Height;
+            float scale = Math.Min(scaleX, scaleY) * 0.95f; // small 2.5% margin around the borders
+            float offsetX = (width - (float)paperBBox.Width * scale) / 2f;
+            float offsetY = (height - (float)paperBBox.Height * scale) / 2f;
+
+            // 5. Initialize Skia canvas with white background
+            SKColor backgroundColor = SKColors.White;
+            using var surface = SKSurface.Create(new SKImageInfo(width, height));
+            SKCanvas canvas = surface.Canvas;
+            canvas.Clear(backgroundColor);
+
+            using var paint = new SKPaint
+            {
+                Color = SKColors.Black,
+                StrokeWidth = OverallLineWeight,
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke
+            };
+
+            // Set up RenderContext for paper space entities
+            var paperContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath);
+
+            // 6. Draw all paper space entities (excluding viewports Id > 1 which are drawn separately)
+            foreach (var entity in paperScene.Entities)
+            {
+                if (entity == null || (entity is Viewport vp && vp.Id > 1))
+                {
+                    continue;
+                }
+
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                paint.Color = ResolveSKColor(entity, backgroundColor);
+                float resolvedWeight = ResolveLineWeightValue(entity);
+                paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
+
+                var renderer = FindRenderer(entity);
+                renderer?.Draw(paperContext, entity);
+
+                sw.Stop();
+                PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+            }
+
+            // 7. Render Model Space inside each Viewport (Id > 1)
+            foreach (var entity in paperScene.Entities)
+            {
+                if (entity is Viewport vp && vp.Id > 1)
+                {
+                    // Viewport screen clip bounds
+                    SKPoint screenPMin = paperContext.ToScreenPoint(vp.Center.X - vp.Width / 2, vp.Center.Y - vp.Height / 2);
+                    SKPoint screenPMax = paperContext.ToScreenPoint(vp.Center.X + vp.Width / 2, vp.Center.Y + vp.Height / 2);
+
+                    float cMinX = Math.Min(screenPMin.X, screenPMax.X);
+                    float cMaxX = Math.Max(screenPMin.X, screenPMax.X);
+                    float cMinY = Math.Min(screenPMin.Y, screenPMax.Y);
+                    float cMaxY = Math.Max(screenPMin.Y, screenPMax.Y);
+
+                    var screenClipRect = new SKRect(cMinX, cMinY, cMaxX, cMaxY);
+
+                    // 7a. Draw Viewport Boundary (if viewport outline is visible)
+                    bool borderIsVisible = !vp.IsInvisible;
+                    if (vp.Layer != null && !vp.Layer.IsOn)
+                    {
+                        borderIsVisible = false;
+                    }
+
+                    if (borderIsVisible)
+                    {
+                        using var borderPaint = new SKPaint
+                        {
+                            Color = ResolveSKColor(vp, backgroundColor),
+                            StrokeWidth = Math.Max(0.5f, OverallLineWeight * (ResolveLineWeightValue(vp) / 25f)),
+                            Style = SKPaintStyle.Stroke,
+                            IsAntialias = true
+                        };
+                        canvas.DrawRect(screenClipRect, borderPaint);
+                    }
+
+                    // 7b. Clip and render model space entities
+                    canvas.Save();
+                    canvas.ClipRect(screenClipRect);
+
+                    var modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, vp);
+
+                    foreach (var mEntity in modelScene.Entities)
+                    {
+                        if (mEntity == null) continue;
+
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                        paint.Color = ResolveSKColor(mEntity, backgroundColor);
+                        float resolvedWeight = ResolveLineWeightValue(mEntity);
+                        paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
+
+                        var renderer = FindRenderer(mEntity);
+                        renderer?.Draw(modelContext, mEntity);
+
+                        sw.Stop();
+                        PerformanceTracker.RecordRender(mEntity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+                    }
+
+                    canvas.Restore();
+                }
+            }
+
+            // 8. Save snapshot
+            using var image = surface.Snapshot();
+            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var stream = File.OpenWrite(outputPath);
+            data.SaveTo(stream);
         }
 
         public static bool TryParseHexColor(string hex, out SKColor color)

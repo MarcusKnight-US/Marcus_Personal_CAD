@@ -10,6 +10,8 @@ namespace DwgToPngConverter.Scene
 {
     public class CadScene
     {
+        public static string? SheetNumber { get; set; } = null;
+
         public List<Entity> Entities { get; } = new List<Entity>();
         public DwgToPngConverter.Geometry.BoundingBox BoundingBox { get; } = new DwgToPngConverter.Geometry.BoundingBox();
 
@@ -20,11 +22,42 @@ namespace DwgToPngConverter.Scene
                 return;
             }
 
+            // Pre-pass: Find the layout sheet number "X" attribute from the "title" insert
+            if (SheetNumber == null)
+            {
+                foreach (var entity in entities)
+                {
+                    if (entity is Insert insert && insert.Block != null && insert.Block.Name.Equals("title", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (insert.Attributes != null)
+                        {
+                            foreach (var attr in insert.Attributes)
+                            {
+                                if (attr != null && attr.Tag != null && attr.Tag.Equals("X", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    SheetNumber = attr.Value;
+                                    break;
+                                }
+                            }
+                        }
+                        if (SheetNumber != null) break;
+                    }
+                }
+            }
+
             foreach (var entity in entities)
             {
                 if (entity == null)
                 {
                     continue;
+                }
+
+                if (entity.Layer != null && !(entity is Viewport))
+                {
+                    if (!entity.Layer.IsOn || (entity.Layer.Flags & ACadSharp.Tables.LayerFlags.Frozen) != ACadSharp.Tables.LayerFlags.None)
+                    {
+                        continue;
+                    }
                 }
 
                 if (entity is Insert insert)
@@ -52,13 +85,34 @@ namespace DwgToPngConverter.Scene
             }
         }
 
-        private static List<Entity> ExplodeInsert(Insert insert)
+        private static List<Entity> ExplodeInsert(Insert insert, Dictionary<string, string>? parentAttribDict = null)
         {
             var result = new List<Entity>();
             if (insert.Block == null)
             {
                 return result;
             }
+
+            var attribDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (insert.Attributes != null)
+            {
+                foreach (var attr in insert.Attributes)
+                {
+                    if (attr != null && attr.Tag != null)
+                    {
+                        attribDict[attr.Tag] = attr.Value ?? "";
+                    }
+                }
+            }
+
+            if (parentAttribDict != null)
+            {
+                foreach (var kvp in parentAttribDict)
+                {
+                    attribDict[kvp.Key] = kvp.Value;
+                }
+            }
+
 
             int colCount = insert.ColumnCount == 0 ? 1 : insert.ColumnCount;
             int rowCount = insert.RowCount == 0 ? 1 : insert.RowCount;
@@ -86,7 +140,8 @@ namespace DwgToPngConverter.Scene
                             transform,
                             insert.Color,
                             insert.Layer,
-                            insert.LineWeight
+                            insert.LineWeight,
+                            attribDict
                         );
                         result.AddRange(exploded);
                     }
@@ -101,7 +156,8 @@ namespace DwgToPngConverter.Scene
             Transformation transform,
             ACadSharp.Color? parentColor = null,
             ACadSharp.Tables.Layer? parentLayer = null,
-            LineWeightType? parentLineWeight = null)
+            LineWeightType? parentLineWeight = null,
+            Dictionary<string, string>? attribDict = null)
         {
             var list = new List<Entity>();
 
@@ -132,7 +188,7 @@ namespace DwgToPngConverter.Scene
 
             if (entity is Insert childInsert)
             {
-                var childExploded = ExplodeInsert(childInsert);
+                var childExploded = ExplodeInsert(childInsert, attribDict);
                 foreach (var childEntity in childExploded)
                 {
                     var transformed = ExplodeAndTransform(
@@ -140,7 +196,8 @@ namespace DwgToPngConverter.Scene
                         transform,
                         entityColor,
                         entityLayer,
-                        entityLineWeight
+                        entityLineWeight,
+                        attribDict
                     );
                     list.AddRange(transformed);
                 }
@@ -263,6 +320,53 @@ namespace DwgToPngConverter.Scene
                 }
                 list.Add(newSpline);
             }
+            else if (entity is AttributeDefinition attrDef)
+            {
+                string val = attrDef.Value ?? "";
+                string tag = attrDef.Tag ?? "";
+
+                bool found = false;
+                if (attribDict != null)
+                {
+                    if (attribDict.TryGetValue(tag, out var v))
+                    {
+                        val = v;
+                        found = true;
+                    }
+                    else if (tag.Equals("VIEWNUMBER", StringComparison.OrdinalIgnoreCase) && attribDict.TryGetValue("#", out v))
+                    {
+                        val = v;
+                        found = true;
+                    }
+                    else if (tag.Equals("VIEWTITLE", StringComparison.OrdinalIgnoreCase) && attribDict.TryGetValue("VIEWNAME", out v))
+                    {
+                        val = v;
+                        found = true;
+                    }
+                }
+
+                if (!found && tag.Equals("SHEETNUMBER", StringComparison.OrdinalIgnoreCase) && SheetNumber != null)
+                {
+                    val = SheetNumber;
+                }
+
+                if (tag.Equals("X", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(val))
+                {
+                    SheetNumber = val;
+                }
+
+                list.Add(new TextEntity()
+                {
+                    Value = val,
+                    InsertPoint = transform.TransformPoint(attrDef.InsertPoint),
+                    Height = attrDef.Height * Math.Max(Math.Abs(transform.ScaleX), Math.Abs(transform.ScaleY)),
+                    Rotation = attrDef.Rotation + transform.Rotation,
+                    Color = entityColor.Value,
+                    Layer = entityLayer,
+                    LineType = attrDef.LineType,
+                    LineWeight = entityLineWeight
+                });
+            }
             else if (entity is TextEntity text)
             {
                 list.Add(new TextEntity()
@@ -318,6 +422,145 @@ namespace DwgToPngConverter.Scene
                     Color = entityColor.Value,
                     Layer = entityLayer,
                     LineType = rasterImage.LineType,
+                    LineWeight = entityLineWeight
+                });
+            }
+            else if (entity is Hatch hatch)
+            {
+                var newHatch = new Hatch()
+                {
+                    IsSolid = hatch.IsSolid,
+                    Pattern = hatch.Pattern,
+                    PatternAngle = hatch.PatternAngle,
+                    PatternScale = hatch.PatternScale,
+                    PatternType = hatch.PatternType,
+                    Color = entityColor.Value,
+                    Layer = entityLayer,
+                    LineType = hatch.LineType,
+                    LineWeight = entityLineWeight
+                };
+
+                if (hatch.Paths != null)
+                {
+                    foreach (var path in hatch.Paths)
+                    {
+                        if (path == null) continue;
+
+                        var newPath = new Hatch.BoundaryPath()
+                        {
+                            Flags = path.Flags
+                        };
+
+                        if (path.Edges != null && path.Edges.Count > 0)
+                        {
+                            foreach (var edge in path.Edges)
+                            {
+                                if (edge == null) continue;
+
+                                if (edge is Hatch.BoundaryPath.Line lineEdge)
+                                {
+                                    newPath.Edges.Add(new Hatch.BoundaryPath.Line()
+                                    {
+                                        Start = transform.TransformPoint(lineEdge.Start),
+                                        End = transform.TransformPoint(lineEdge.End)
+                                    });
+                                }
+                                else if (edge is Hatch.BoundaryPath.Arc arcEdge)
+                                {
+                                    newPath.Edges.Add(new Hatch.BoundaryPath.Arc()
+                                    {
+                                        Center = transform.TransformPoint(arcEdge.Center),
+                                        Radius = arcEdge.Radius * Math.Max(Math.Abs(transform.ScaleX), Math.Abs(transform.ScaleY)),
+                                        StartAngle = arcEdge.StartAngle + transform.Rotation,
+                                        EndAngle = arcEdge.EndAngle + transform.Rotation,
+                                        CounterClockWise = arcEdge.CounterClockWise
+                                    });
+                                }
+                                else if (edge is Hatch.BoundaryPath.Ellipse ellEdge)
+                                {
+                                    newPath.Edges.Add(new Hatch.BoundaryPath.Ellipse()
+                                    {
+                                        Center = transform.TransformPoint(ellEdge.Center),
+                                        MajorAxisEndPoint = transform.TransformPoint(ellEdge.MajorAxisEndPoint),
+                                        RadiusRatio = ellEdge.RadiusRatio,
+                                        StartAngle = ellEdge.StartAngle + transform.Rotation,
+                                        EndAngle = ellEdge.EndAngle + transform.Rotation,
+                                        CounterClockWise = ellEdge.CounterClockWise
+                                    });
+                                }
+                                else if (edge is Hatch.BoundaryPath.Polyline polyEdge)
+                                {
+                                    var newPoly = new Hatch.BoundaryPath.Polyline()
+                                    {
+                                        IsClosed = polyEdge.IsClosed
+                                    };
+                                    if (polyEdge.Vertices != null)
+                                    {
+                                        foreach (var v in polyEdge.Vertices)
+                                        {
+                                            var pt2D = transform.TransformPoint(new XY(v.X, v.Y));
+                                            newPoly.Vertices.Add(new XYZ(pt2D.X, pt2D.Y, v.Z));
+                                        }
+                                    }
+                                    newPath.Edges.Add(newPoly);
+                                }
+                                else if (edge is Hatch.BoundaryPath.Spline splineEdge)
+                                {
+                                    var newSpline = new Hatch.BoundaryPath.Spline()
+                                    {
+                                        Degree = splineEdge.Degree,
+                                        IsPeriodic = splineEdge.IsPeriodic,
+                                        IsRational = splineEdge.IsRational,
+                                        StartTangent = transform.TransformPoint(splineEdge.StartTangent),
+                                        EndTangent = transform.TransformPoint(splineEdge.EndTangent)
+                                    };
+                                    if (splineEdge.ControlPoints != null)
+                                    {
+                                        foreach (var cp in splineEdge.ControlPoints)
+                                        {
+                                            newSpline.ControlPoints.Add(transform.TransformPoint(cp));
+                                        }
+                                    }
+                                    if (splineEdge.FitPoints != null)
+                                    {
+                                        foreach (var fp in splineEdge.FitPoints)
+                                        {
+                                            newSpline.FitPoints.Add(transform.TransformPoint(fp));
+                                        }
+                                    }
+                                    if (splineEdge.Knots != null)
+                                    {
+                                        newSpline.Knots.AddRange(splineEdge.Knots);
+                                    }
+                                    newPath.Edges.Add(newSpline);
+                                }
+                            }
+                        }
+
+                        if (path.Entities != null && path.Entities.Count > 0)
+                        {
+                            foreach (var pathEnt in path.Entities)
+                            {
+                                if (pathEnt == null) continue;
+                                var transformedEnts = ExplodeAndTransform(pathEnt, transform, entityColor, entityLayer, entityLineWeight);
+                                newPath.Entities.AddRange(transformedEnts);
+                            }
+                        }
+
+                        newHatch.Paths.Add(newPath);
+                    }
+                }
+
+                list.Add(newHatch);
+            }
+            else if (entity is Point point)
+            {
+                list.Add(new Point()
+                {
+                    Location = transform.TransformPoint(point.Location),
+                    Color = entityColor.Value,
+                    Layer = entityLayer,
+                    LineType = point.LineType,
                     LineWeight = entityLineWeight
                 });
             }
@@ -501,7 +744,24 @@ namespace DwgToPngConverter.Scene
                     LineType = mleader.LineType,
                     LineWeight = mleaderLineWeight
                 };
-                var exploded = ExplodeAndTransform(insertBlock, transform, mleaderColor, mleaderLayer, mleaderLineWeight);
+
+                var mleaderAttribDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                if (mleader.BlockAttributes != null)
+                {
+                    foreach (var attr in mleader.BlockAttributes)
+                    {
+                        if (attr != null && attr.AttributeDefinition != null)
+                        {
+                            string tag = attr.AttributeDefinition.Tag ?? "";
+                            if (!string.IsNullOrEmpty(tag))
+                            {
+                                mleaderAttribDict[tag] = attr.Text ?? "";
+                            }
+                        }
+                    }
+                }
+
+                var exploded = ExplodeAndTransform(insertBlock, transform, mleaderColor, mleaderLayer, mleaderLineWeight, mleaderAttribDict);
                 list.AddRange(exploded);
             }
 

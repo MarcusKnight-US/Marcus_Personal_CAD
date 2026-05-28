@@ -9,7 +9,7 @@ namespace DwgToPngConverter.Renderers
         protected override void Draw(RenderContext context, Circle circle)
         {
             var center = context.ToScreenPoint(circle.Center);
-            var radius = (float)(circle.Radius * context.Scale);
+            var radius = (float)(circle.Radius * context.EffectiveScale);
             context.Canvas.DrawCircle(center, radius, context.Paint);
         }
     }

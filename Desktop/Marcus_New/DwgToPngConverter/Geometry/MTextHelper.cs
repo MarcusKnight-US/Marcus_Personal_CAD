@@ -14,13 +14,28 @@ namespace DwgToPngConverter.Geometry
         private static readonly Regex _regexFormat7 = new(@"\\[Qq][^;]*;", RegexOptions.Compiled);
         private static readonly Regex _regexFormat8 = new(@"\\[SsloOL][^;]*;", RegexOptions.Compiled);
         private static readonly Regex _regexFormat9 = new(@"\\[A-Za-z][^;]*;", RegexOptions.Compiled);
+        private static readonly Regex _regexStack = new(@"\\[Ss]([^;]+);", RegexOptions.Compiled);
 
         public static string CleanMText(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
-            string cleaned = text.Replace("\\P", "\n").Replace("\\p", "\n");
+            // Handle stacks first to preserve the fraction numbers (e.g. \S1/2; or \S1^2;)
+            string cleaned = _regexStack.Replace(text, match =>
+            {
+                string inner = match.Groups[1].Value;
+                return inner.Replace("^", "/").Replace("#", "/");
+            });
+
+            cleaned = cleaned.Replace("\\P", "\n").Replace("\\p", "\n");
+            
+            // Strip inline formatting tags that don't have terminating semicolons
+            cleaned = cleaned.Replace("\\L", "").Replace("\\l", "")
+                             .Replace("\\O", "").Replace("\\o", "")
+                             .Replace("\\K", "").Replace("\\k", "")
+                             .Replace("\\~", " ");
+
             // Standard diameter and annotation symbol mappings
             cleaned = cleaned.Replace("%%c", "Ø").Replace("%%C", "Ø");
             cleaned = cleaned.Replace("%%d", "°").Replace("%%D", "°");
