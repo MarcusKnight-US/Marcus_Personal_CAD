@@ -1,1 +1,1 @@
-# Project-for-Greg
+# Personal project for a dwg to png renderer
