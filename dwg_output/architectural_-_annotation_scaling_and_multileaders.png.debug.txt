@@ -6,11 +6,11 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 16600
+Process ID (PID)           : 30220
 Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\architectural_-_annotation_scaling_and_multileaders.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\architectural_-_annotation_scaling_and_multileaders.png --debug -bg=#FFFF00
-Start Time                 : 2026-06-09 15:13:34
-Total Process Run Time     : 326.83 ms
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll dwg_examples/architectural_-_annotation_scaling_and_multileaders.dwg dwg_output/architectural_-_annotation_scaling_and_multileaders.png --debug
+Start Time                 : 2026-06-09 15:49:57
+Total Process Run Time     : 905.33 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
@@ -26,13 +26,13 @@ Logical Processor Count    : 32
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.3437500 (User: 00:00:00.2812500, Privileged: 00:00:00.0625000)
-Peak Physical Memory (WS)  : 81.66 MB (85,622,784 bytes)
-Current Physical Memory    : 70.11 MB (73,519,104 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,483,196,928 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,470,347,776 bytes)
-Private Memory Size        : 37.55 MB (39,374,848 bytes)
-Managed GC Heap Size       : 8.61 MB (9,023,792 bytes)
+Total CPU Processor Time   : 00:00:00.9375000 (User: 00:00:00.8125000, Privileged: 00:00:00.1250000)
+Peak Physical Memory (WS)  : 198.92 MB (208,580,608 bytes)
+Current Physical Memory    : 73.70 MB (77,283,328 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,608,362,496 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,478,482,432 bytes)
+Private Memory Size        : 38.61 MB (40,480,768 bytes)
+Managed GC Heap Size       : 8.99 MB (9,428,048 bytes)
 Active Process Threads     : 8
 Garbage Collections        : Gen 0: 1, Gen 1: 0, Gen 2: 0
 
@@ -43,7 +43,7 @@ Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\d
 Input DWG File Size        : 184.56 KB (188,992 bytes)
 Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\architectural_-_annotation_scaling_and_multileaders.png
 Selected Layout            : 'SECTIONS AND DETAILS'
-Target Canvas Resolution   : 2400 x 1532 px
+Target Canvas Resolution   : 7200 x 4595 px
 Bounding Box Extents       :
   Min X                    : -1.5037
   Min Y                    : -1.3965
@@ -51,22 +51,23 @@ Bounding Box Extents       :
   Max Y                    : 26.7489
   Width (Drawing Units)    : 44.1038
   Height (Drawing Units)   : 28.1454
-Scale Factor (Effective)   : 51.696182
-Offset X                   : 60.0000
-Offset Y                   : 38.4941
+Scale Factor (Effective)   : 155.088547
+Offset X                   : 180.0000
+Offset Y                   : 114.9822
 
 --------------------------------------------------------------------------------
 5. DETAILED ENTITY BREAKDOWN
 --------------------------------------------------------------------------------
-Total Entities Processed   : 1920
+Total Entities Processed   : 2028
 Breakdown by Entity Type:
-  Model:Line               : 1427
+  Model:Line               : 1499
   Model:LwPolyline         : 104
   Model:Point              : 84
   Model:MText              : 80
   Model:Arc                : 64
   Model:Hatch              : 52
   Paper:TextEntity         : 45
+  Model:Solid              : 36
   Paper:Line               : 29
   Model:Circle             : 13
   Model:TextEntity         : 6
@@ -78,10 +79,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 162.31 ms
-Layout Selection           : 2.59 ms
-Scene Processing & Render  : 149.08 ms
-Total Summed Steps Time    : 313.97 ms
+DWG Loading & Parsing      : 165.35 ms
+Layout Selection           : 2.20 ms
+Scene Processing & Render  : 724.11 ms
+Total Summed Steps Time    : 891.66 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -94,31 +95,33 @@ Total Summed Steps Time    : 313.97 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-MText                     | 125      |             14.946 |           0.120
-LwPolyline                | 221      |              0.959 |           0.004
-Hatch                     | 107      |              0.692 |           0.006
-Viewport                  | 5        |              0.398 |           0.080
-Arc                       | 138      |              0.395 |           0.003
-Line                      | 2893     |              0.212 |           0.000
-TextEntity                | 51       |              0.099 |           0.002
+MText                     | 125      |             14.432 |           0.115
+LwPolyline                | 221      |              0.957 |           0.004
+Hatch                     | 107      |              0.713 |           0.007
+Viewport                  | 5        |              0.413 |           0.083
+Arc                       | 138      |              0.410 |           0.003
+Line                      | 2965     |              0.214 |           0.000
+TextEntity                | 51       |              0.100 |           0.002
+Solid                     | 36       |              0.041 |           0.001
 Point                     | 171      |              0.015 |           0.000
 Circle                    | 29       |              0.003 |           0.000
 ------------------------------------------------------------------------
-TOTAL                     | 3740     |             17.719 |           0.005
+TOTAL                     | 3848     |             17.299 |           0.004
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-MText                     | 325      |              6.656 |           0.020
-Line                      | 5737     |              3.361 |           0.001
-TextEntity                | 69       |              2.318 |           0.034
-LwPolyline                | 418      |              1.675 |           0.004
-Hatch                     | 208      |              1.457 |           0.007
-Viewport                  | 1        |              0.708 |           0.708
-Point                     | 336      |              0.445 |           0.001
-Arc                       | 256      |              0.409 |           0.002
-Circle                    | 56       |              0.218 |           0.004
+MText                     | 325      |             33.716 |           0.104
+TextEntity                | 69       |              8.558 |           0.124
+Line                      | 6025     |              5.428 |           0.001
+LwPolyline                | 418      |              2.295 |           0.005
+Hatch                     | 208      |              1.499 |           0.007
+Viewport                  | 1        |              0.743 |           0.743
+Point                     | 336      |              0.602 |           0.002
+Solid                     | 144      |              0.547 |           0.004
+Arc                       | 256      |              0.416 |           0.002
+Circle                    | 56       |              0.351 |           0.006
 ------------------------------------------------------------------------
-TOTAL                     | 7406     |             17.248 |           0.002
+TOTAL                     | 7838     |             54.155 |           0.007
 =========================================================================
 

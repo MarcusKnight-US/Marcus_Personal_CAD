@@ -93,6 +93,38 @@ class Program
 {
     static void Main(string[] args)
     {
+        if (args.Length > 0 && args.Contains("--inspect-text-heights"))
+        {
+            string dwgPath = args.FirstOrDefault(a => a.EndsWith(".dwg", StringComparison.OrdinalIgnoreCase)) ?? "dwg_examples/architectural_-_annotation_scaling_and_multileaders.dwg";
+            var thDoc = DwgReader.Read(dwgPath, null);
+            Console.WriteLine($"Inspecting text heights and viewports in {dwgPath}...");
+
+            foreach (var thLayout in thDoc.Layouts)
+            {
+                if (thLayout.AssociatedBlock == null) continue;
+                if (thLayout.Name.Equals("Model", StringComparison.OrdinalIgnoreCase)) continue;
+                Console.WriteLine($"Layout: {thLayout.Name}");
+                foreach (var entity in thLayout.AssociatedBlock.Entities)
+                {
+                    if (entity is Viewport vp && vp.Id > 1)
+                    {
+                        Console.WriteLine($"  Viewport ID={vp.Id} Properties:");
+                        foreach (var prop in vp.GetType().GetProperties())
+                        {
+                            try
+                            {
+                                object val = prop.GetValue(vp);
+                                Console.WriteLine($"    {prop.Name}: {val}");
+                            }
+                            catch {}
+                        }
+                        break; // just print the first viewport to not spam
+                    }
+                }
+            }
+            return;
+        }
+
         // ── Defaults ──────────────────────────────────────────────────────────
         string inputPath      = "dwg_examples";
         string outputPath     = "dwg_output";

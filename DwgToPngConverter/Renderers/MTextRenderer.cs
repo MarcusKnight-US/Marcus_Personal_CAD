@@ -15,7 +15,7 @@ namespace DwgToPngConverter.Renderers
             if (mtext == null || string.IsNullOrEmpty(mtext.Value)) return;
 
             string cleaned = CleanMText(mtext.Value);
-            float screenHeight = (float)(mtext.Height * context.EffectiveScale);
+            float screenHeight = (float)(mtext.Height * context.EffectiveScale * context.TextMultiplier);
 
             double angle = mtext.Rotation % (2 * Math.PI);
             if (angle < 0) angle += 2 * Math.PI;

@@ -399,6 +399,7 @@ namespace DwgToPngConverter.Scene
                     InsertPoint = transform.TransformPoint(mtext.InsertPoint),
                     Height = mtext.Height * Math.Max(Math.Abs(transform.ScaleX), Math.Abs(transform.ScaleY)),
                     AttachmentPoint = mtext.AttachmentPoint,
+                    RectangleWidth = mtext.RectangleWidth * Math.Max(Math.Abs(transform.ScaleX), Math.Abs(transform.ScaleY)),
                     Color = entityColor.Value,
                     Layer = entityLayer,
                     LineType = mtext.LineType,
@@ -647,17 +648,43 @@ namespace DwgToPngConverter.Scene
                 mleaderLineWeight = parentLineWeight.Value;
             }
 
-            // 1. Leader Lines
+            // 1. Leader Lines and Landing Lines
             if (mleader.ContextData.LeaderRoots != null)
             {
                 foreach (var root in mleader.ContextData.LeaderRoots)
                 {
                     if (root == null || root.Lines == null) continue;
 
+                    // Calculate landingStart: landingStart = ConnectionPoint - Direction * LandingDistance
+                    var connectionPoint = root.ConnectionPoint;
+                    var direction = root.Direction;
+                    double landingDistance = root.LandingDistance;
+                    var landingStart = new XYZ(
+                        connectionPoint.X - direction.X * landingDistance,
+                        connectionPoint.Y - direction.Y * landingDistance,
+                        connectionPoint.Z - direction.Z * landingDistance
+                    );
+
+                    // Draw horizontal landing line if landing distance > 0
+                    if (landingDistance > 0)
+                    {
+                        var landingLine = new Line()
+                        {
+                            StartPoint = transform.TransformPoint(landingStart),
+                            EndPoint = transform.TransformPoint(connectionPoint),
+                            Color = mleaderColor.Value,
+                            Layer = mleaderLayer,
+                            LineType = mleader.LineType,
+                            LineWeight = mleaderLineWeight
+                        };
+                        list.Add(landingLine);
+                    }
+
                     foreach (var line in root.Lines)
                     {
-                        if (line == null || line.Points == null || line.Points.Count < 2) continue;
+                        if (line == null || line.Points == null || line.Points.Count == 0) continue;
 
+                        // Draw segments between points in line.Points
                         for (int i = 1; i < line.Points.Count; i++)
                         {
                             var segment = new Line()
@@ -672,8 +699,24 @@ namespace DwgToPngConverter.Scene
                             list.Add(segment);
                         }
 
+                        // Connect last point of line.Points to landingStart
+                        var lastPt = line.Points[line.Points.Count - 1];
+                        var connectSegment = new Line()
+                        {
+                            StartPoint = transform.TransformPoint(lastPt),
+                            EndPoint = transform.TransformPoint(landingStart),
+                            Color = mleaderColor.Value,
+                            Layer = mleaderLayer,
+                            LineType = mleader.LineType,
+                            LineWeight = mleaderLineWeight
+                        };
+                        list.Add(connectSegment);
+
+                        // Draw Arrowhead at first point (line.Points[0])
                         var p0 = line.Points[0];
-                        var p1 = line.Points[1];
+                        // If there are multiple points, direction is along the first segment.
+                        // If there is only one point, direction is from p0 to landingStart.
+                        var p1 = line.Points.Count > 1 ? line.Points[1] : landingStart;
                         double dx = p1.X - p0.X;
                         double dy = p1.Y - p0.Y;
                         double len = Math.Sqrt(dx * dx + dy * dy);
@@ -682,7 +725,11 @@ namespace DwgToPngConverter.Scene
                             double vx = dx / len;
                             double vy = dy / len;
 
-                            double arrowSize = line.ArrowheadSize > 0 ? line.ArrowheadSize : 1.5;
+                            double arrowSize = 1.5;
+                            if (line.ArrowheadSize > 0)
+                                arrowSize = line.ArrowheadSize;
+                            else if (mleader.ContextData.ArrowheadSize > 0)
+                                arrowSize = mleader.ContextData.ArrowheadSize;
 
                             double cos30 = Math.Cos(Math.PI / 6.0);
                             double sin30 = Math.Sin(Math.PI / 6.0);
@@ -696,28 +743,19 @@ namespace DwgToPngConverter.Scene
                             var wingEnd1 = new XYZ(p0.X + w1x * arrowSize, p0.Y + w1y * arrowSize, p0.Z);
                             var wingEnd2 = new XYZ(p0.X + w2x * arrowSize, p0.Y + w2y * arrowSize, p0.Z);
 
-                            var arrowLine1 = new Line()
+                            // Draw arrowhead as a solid-filled triangle for premium rendering look
+                            var arrowhead = new Solid()
                             {
-                                StartPoint = transform.TransformPoint(p0),
-                                EndPoint = transform.TransformPoint(wingEnd1),
+                                FirstCorner = transform.TransformPoint(p0),
+                                SecondCorner = transform.TransformPoint(wingEnd1),
+                                ThirdCorner = transform.TransformPoint(wingEnd2),
+                                FourthCorner = transform.TransformPoint(wingEnd2),
                                 Color = mleaderColor.Value,
                                 Layer = mleaderLayer,
                                 LineType = mleader.LineType,
                                 LineWeight = mleaderLineWeight
                             };
-
-                            var arrowLine2 = new Line()
-                            {
-                                StartPoint = transform.TransformPoint(p0),
-                                EndPoint = transform.TransformPoint(wingEnd2),
-                                Color = mleaderColor.Value,
-                                Layer = mleaderLayer,
-                                LineType = mleader.LineType,
-                                LineWeight = mleaderLineWeight
-                            };
-
-                            list.Add(arrowLine1);
-                            list.Add(arrowLine2);
+                            list.Add(arrowhead);
                         }
                     }
                 }
@@ -726,12 +764,20 @@ namespace DwgToPngConverter.Scene
             // 2. Content
             if (mleader.ContentType == LeaderContentType.MText && !string.IsNullOrEmpty(mleader.ContextData.TextLabel))
             {
+                var attachment = AttachmentPointType.TopLeft;
+                if (mleader.ContextData.TextAttachmentPoint == ACadSharp.TextAttachmentPointType.Center)
+                    attachment = AttachmentPointType.TopCenter;
+                else if (mleader.ContextData.TextAttachmentPoint == ACadSharp.TextAttachmentPointType.Right)
+                    attachment = AttachmentPointType.TopRight;
+
                 var mtext = new MText()
                 {
                     Value = mleader.ContextData.TextLabel,
                     InsertPoint = mleader.ContextData.TextLocation,
                     Height = mleader.ContextData.TextHeight > 0 ? mleader.ContextData.TextHeight : 1.0,
                     AlignmentPoint = new XYZ(Math.Cos(mleader.ContextData.TextRotation), Math.Sin(mleader.ContextData.TextRotation), 0.0),
+                    AttachmentPoint = attachment,
+                    RectangleWidth = mleader.ContextData.BoundaryWidth,
                     Color = mleaderColor.Value,
                     Layer = mleaderLayer,
                     LineType = mleader.LineType,

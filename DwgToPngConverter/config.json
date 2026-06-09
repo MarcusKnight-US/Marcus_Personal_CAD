@@ -1,0 +1,15 @@
+{
+  "DefaultDpi": 200,
+  "TextSizeMultiplier": 1.0,
+  "MinLayoutWidth": 1600,
+  "MaxLayoutWidth": 8000,
+  "DefaultPaperWidthMm": 914.4,
+  "DefaultPaperHeightMm": 609.6,
+  "OverallLineWeight": 1.0,
+  "BackgroundColor": "#FFFFFF",
+  "MinLineWeight": 0.5,
+  "ModelSpaceMarginMultiplier": 0.9,
+  "PaperSpaceMarginMultiplier": 0.95,
+  "ModelSpaceWidth": 1000,
+  "ModelSpaceHeight": 1000
+}

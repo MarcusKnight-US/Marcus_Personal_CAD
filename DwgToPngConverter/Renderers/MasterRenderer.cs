@@ -20,8 +20,8 @@ namespace DwgToPngConverter.Renderers
         private readonly List<IEntityRenderer> _rendererFallback = new();
         private readonly Dictionary<Type, IEntityRenderer?> _resolvedRendererCache = new();
 
-        public float OverallLineWeight { get; set; } = 1f;
-        public string BackgroundColorHex { get; set; } = "#FFFFFF";
+        public float OverallLineWeight { get; set; } = AppConfig.Instance.OverallLineWeight;
+        public string BackgroundColorHex { get; set; } = AppConfig.Instance.BackgroundColor;
 
         public MasterRenderer()
         {
@@ -66,12 +66,12 @@ namespace DwgToPngConverter.Renderers
                 return;
             }
 
-            int width = 1000;
-            int height = 1000;
+            int width = AppConfig.Instance.ModelSpaceWidth;
+            int height = AppConfig.Instance.ModelSpaceHeight;
 
             float scaleX = width / (float)bbox.Width;
             float scaleY = height / (float)bbox.Height;
-            float scale = Math.Min(scaleX, scaleY) * 0.9f;
+            float scale = Math.Min(scaleX, scaleY) * AppConfig.Instance.ModelSpaceMarginMultiplier;
             float offsetX = (width - (float)bbox.Width * scale) / 2f;
             float offsetY = (height - (float)bbox.Height * scale) / 2f;
 
@@ -124,7 +124,7 @@ namespace DwgToPngConverter.Renderers
                 Style = SKPaintStyle.Stroke
             };
 
-            var context = new RenderContext(canvas, bbox, scale, offsetX, offsetY, height, paint, dwgFilePath);
+            var context = new RenderContext(canvas, bbox, scale, offsetX, offsetY, height, paint, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
 
             foreach (var entity in entities)
             {
@@ -138,7 +138,7 @@ namespace DwgToPngConverter.Renderers
                 paint.Color = ResolveSKColor(entity, backgroundColor);
                 
                 float resolvedWeight = ResolveLineWeightValue(entity);
-                paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
+                paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
 
                 paint.PathEffect = CreatePathEffect(entity, context.EffectiveScale);
 
@@ -297,13 +297,34 @@ namespace DwgToPngConverter.Renderers
                 return;
             }
 
-            // 4. Set size to preserve aspect ratio of the sheet
-            int width = 2400; // premium large resolution
+            // 4. Set size based on configuration, paper size and target DPI
+            int width = 2400;
+            var config = AppConfig.Instance;
+            double pWidthMm = layout.PaperWidth > 0 ? layout.PaperWidth : config.DefaultPaperWidthMm;
+            double pHeightMm = layout.PaperHeight > 0 ? layout.PaperHeight : config.DefaultPaperHeightMm;
+
+            double pWidthInches = pWidthMm / 25.4;
+            double pHeightInches = pHeightMm / 25.4;
+
+            bool bboxIsLandscape = paperBBox.Width > paperBBox.Height;
+            bool paperIsLandscape = pWidthInches > pHeightInches;
+
+            if (bboxIsLandscape != paperIsLandscape)
+            {
+                double temp = pWidthInches;
+                pWidthInches = pHeightInches;
+                pHeightInches = temp;
+            }
+
+            width = (int)Math.Round(pWidthInches * config.DefaultDpi);
+            if (width < config.MinLayoutWidth) width = config.MinLayoutWidth;
+            if (width > config.MaxLayoutWidth) width = config.MaxLayoutWidth;
+
             int height = (int)Math.Round(width * (paperBBox.Height / paperBBox.Width));
 
             float scaleX = width / (float)paperBBox.Width;
             float scaleY = height / (float)paperBBox.Height;
-            float scale = Math.Min(scaleX, scaleY) * 0.95f; // small 2.5% margin around the borders
+            float scale = Math.Min(scaleX, scaleY) * AppConfig.Instance.PaperSpaceMarginMultiplier;
             float offsetX = (width - (float)paperBBox.Width * scale) / 2f;
             float offsetY = (height - (float)paperBBox.Height * scale) / 2f;
 
@@ -358,7 +379,7 @@ namespace DwgToPngConverter.Renderers
             };
 
             // Set up RenderContext for paper space entities
-            var paperContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath);
+            var paperContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
 
             // 6. Draw all paper space entities (excluding viewports Id > 1 which are drawn separately)
             foreach (var entity in paperScene.Entities)
@@ -372,7 +393,7 @@ namespace DwgToPngConverter.Renderers
 
                 paint.Color = ResolveSKColor(entity, backgroundColor);
                 float resolvedWeight = ResolveLineWeightValue(entity);
-                paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
+                paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
 
                 paint.PathEffect = CreatePathEffect(entity, paperContext.EffectiveScale);
 
@@ -411,7 +432,7 @@ namespace DwgToPngConverter.Renderers
                         using var borderPaint = new SKPaint
                         {
                             Color = ResolveSKColor(vp, backgroundColor),
-                            StrokeWidth = Math.Max(0.5f, OverallLineWeight * (ResolveLineWeightValue(vp) / 25f)),
+                            StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (ResolveLineWeightValue(vp) / 25f)),
                             Style = SKPaintStyle.Stroke,
                             IsAntialias = true
                         };
@@ -439,7 +460,7 @@ namespace DwgToPngConverter.Renderers
                     }
                     else
                     {
-                        modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, vp);
+                        modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, vp, AppConfig.Instance.TextSizeMultiplier);
                     }
 
                     // 7c. Clip and render model space entities
@@ -454,7 +475,7 @@ namespace DwgToPngConverter.Renderers
 
                         paint.Color = ResolveSKColor(mEntity, backgroundColor);
                         float resolvedWeight = ResolveLineWeightValue(mEntity);
-                        paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
+                        paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
 
                         paint.PathEffect = CreatePathEffect(mEntity, modelContext.EffectiveScale);
 
@@ -529,7 +550,7 @@ namespace DwgToPngConverter.Renderers
 
             float scaleX = screenW / (float)modelBBox.Width;
             float scaleY = screenH / (float)modelBBox.Height;
-            float fitScale = Math.Min(scaleX, scaleY) * 0.95f;   // 5% inner margin
+            float fitScale = Math.Min(scaleX, scaleY) * AppConfig.Instance.PaperSpaceMarginMultiplier;   // inner margin
 
             float offsetX = screenRect.Left + (screenW - (float)modelBBox.Width  * fitScale) / 2f;
             float offsetY = screenRect.Top  + (screenH - (float)modelBBox.Height * fitScale) / 2f;
@@ -539,7 +560,7 @@ namespace DwgToPngConverter.Renderers
             if (canvasHeight <= 0) canvasHeight = (int)screenRect.Bottom;
 
             return new RenderContext(canvas, modelBBox, fitScale, offsetX, offsetY,
-                canvasHeight, paint, dwgFilePath, activeViewport: null);
+                canvasHeight, paint, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
         }
 
         public static bool TryParseHexColor(string hex, out SKColor color)

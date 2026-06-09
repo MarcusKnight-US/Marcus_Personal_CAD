@@ -15,10 +15,11 @@ namespace DwgToPngConverter.Renderers
         public SKPaint Paint { get; }
         public string? DwgFilePath { get; }
         public Viewport? ActiveViewport { get; }
+        public float TextMultiplier { get; }
 
         public float EffectiveScale => Scale * (ActiveViewport != null ? (float)ActiveViewport.ScaleFactor : 1f);
 
-        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, string? dwgFilePath = null, Viewport? activeViewport = null)
+        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, string? dwgFilePath = null, Viewport? activeViewport = null, float textMultiplier = 1f)
         {
             Canvas = canvas;
             BoundingBox = bbox;
@@ -29,6 +30,7 @@ namespace DwgToPngConverter.Renderers
             Paint = paint;
             DwgFilePath = dwgFilePath;
             ActiveViewport = activeViewport;
+            TextMultiplier = textMultiplier;
         }
 
         public SKPoint ToScreenPoint(double x, double y)
