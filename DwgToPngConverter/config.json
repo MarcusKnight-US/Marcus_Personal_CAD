@@ -6,7 +6,7 @@
   "DefaultPaperWidthMm": 914.4,
   "DefaultPaperHeightMm": 609.6,
   "OverallLineWeight": 1.0,
-  "BackgroundColor": "#FFFFFF",
+  "BackgroundColor": "#FFFF00",
   "MinLineWeight": 0.5,
   "ModelSpaceMarginMultiplier": 0.9,
   "PaperSpaceMarginMultiplier": 0.95,

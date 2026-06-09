@@ -6,11 +6,11 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 41140
+Process ID (PID)           : 31568
 Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\blocks_and_tables_-_imperial.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\blocks_and_tables_-_imperial.png --debug -bg=#FFFF00
-Start Time                 : 2026-06-09 15:13:37
-Total Process Run Time     : 334.64 ms
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\blocks_and_tables_-_imperial.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\blocks_and_tables_-_imperial.png --debug
+Start Time                 : 2026-06-09 16:10:27
+Total Process Run Time     : 978.87 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
@@ -26,13 +26,13 @@ Logical Processor Count    : 32
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.3593750 (User: 00:00:00.3281250, Privileged: 00:00:00.0312500)
-Peak Physical Memory (WS)  : 84.05 MB (88,129,536 bytes)
-Current Physical Memory    : 69.63 MB (73,015,296 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,485,580,800 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,470,147,072 bytes)
-Private Memory Size        : 37.43 MB (39,247,872 bytes)
-Managed GC Heap Size       : 17.67 MB (18,524,136 bytes)
+Total CPU Processor Time   : 00:00:01 (User: 00:00:00.8906250, Privileged: 00:00:00.1093750)
+Peak Physical Memory (WS)  : 220.01 MB (230,699,008 bytes)
+Current Physical Memory    : 72.77 MB (76,304,384 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,628,355,072 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,473,575,424 bytes)
+Private Memory Size        : 38.97 MB (40,861,696 bytes)
+Managed GC Heap Size       : 17.86 MB (18,732,400 bytes)
 Active Process Threads     : 8
 Garbage Collections        : Gen 0: 1, Gen 1: 0, Gen 2: 0
 
@@ -43,7 +43,7 @@ Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\d
 Input DWG File Size        : 221.69 KB (227,008 bytes)
 Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\blocks_and_tables_-_imperial.png
 Selected Layout            : 'D-size Plot'
-Target Canvas Resolution   : 2400 x 1799 px
+Target Canvas Resolution   : 7200 x 5397 px
 Bounding Box Extents       :
   Min X                    : -0.4239
   Min Y                    : -2.0717
@@ -51,9 +51,9 @@ Bounding Box Extents       :
   Max Y                    : 25.1670
   Width (Drawing Units)    : 36.3373
   Height (Drawing Units)   : 27.2388
-Scale Factor (Effective)   : 62.743271
-Offset X                   : 60.0387
-Offset Y                   : 44.9750
+Scale Factor (Effective)   : 188.229813
+Offset X                   : 180.1160
+Offset Y                   : 134.9250
 
 --------------------------------------------------------------------------------
 5. DETAILED ENTITY BREAKDOWN
@@ -77,10 +77,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 172.20 ms
-Layout Selection           : 2.46 ms
-Scene Processing & Render  : 146.29 ms
-Total Summed Steps Time    : 320.94 ms
+DWG Loading & Parsing      : 175.24 ms
+Layout Selection           : 2.22 ms
+Scene Processing & Render  : 787.58 ms
+Total Summed Steps Time    : 965.04 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -93,29 +93,29 @@ Total Summed Steps Time    : 320.94 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-MText                     | 184      |             13.276 |           0.072
-LwPolyline                | 174      |              1.208 |           0.007
-Viewport                  | 3        |              0.422 |           0.141
-Hatch                     | 1        |              0.410 |           0.410
-Arc                       | 120      |              0.218 |           0.002
-TextEntity                | 512      |              0.141 |           0.000
-Line                      | 1017     |              0.079 |           0.000
+MText                     | 184      |             13.141 |           0.071
+LwPolyline                | 174      |              1.238 |           0.007
+Viewport                  | 3        |              0.427 |           0.142
+Hatch                     | 1        |              0.406 |           0.406
+Arc                       | 120      |              0.224 |           0.002
+TextEntity                | 512      |              0.134 |           0.000
+Line                      | 1017     |              0.078 |           0.000
 Circle                    | 172      |              0.011 |           0.000
 ------------------------------------------------------------------------
-TOTAL                     | 2183     |             15.765 |           0.007
+TOTAL                     | 2183     |             15.659 |           0.007
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-MText                     | 204      |              5.524 |           0.027
-TextEntity                | 983      |              3.805 |           0.004
-LwPolyline                | 302      |              2.402 |           0.008
-Line                      | 1625     |              1.531 |           0.001
-Hatch                     | 1        |              1.068 |           1.068
-Viewport                  | 1        |              0.694 |           0.694
-Arc                       | 240      |              0.505 |           0.002
-Circle                    | 342      |              0.456 |           0.001
+MText                     | 204      |              6.612 |           0.032
+TextEntity                | 983      |              4.805 |           0.005
+LwPolyline                | 302      |              3.429 |           0.011
+Line                      | 1625     |              2.177 |           0.001
+Hatch                     | 1        |              1.103 |           1.103
+Viewport                  | 1        |              0.788 |           0.788
+Circle                    | 342      |              0.712 |           0.002
+Arc                       | 240      |              0.703 |           0.003
 ------------------------------------------------------------------------
-TOTAL                     | 3698     |             15.985 |           0.004
+TOTAL                     | 3698     |             20.328 |           0.005
 =========================================================================
 

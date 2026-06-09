@@ -6,11 +6,11 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 2516
+Process ID (PID)           : 39052
 Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\title_block-iso.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\title_block-iso.png --debug -bg=#FFFF00
-Start Time                 : 2026-06-09 15:13:49
-Total Process Run Time     : 210.07 ms
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\title_block-iso.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\title_block-iso.png --debug
+Start Time                 : 2026-06-09 16:10:41
+Total Process Run Time     : 224.39 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
@@ -26,13 +26,13 @@ Logical Processor Count    : 32
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.2656250 (User: 00:00:00.1562500, Privileged: 00:00:00.1093750)
-Peak Physical Memory (WS)  : 51.38 MB (53,878,784 bytes)
-Current Physical Memory    : 50.28 MB (52,723,712 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,463,482,880 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,461,365,248 bytes)
-Private Memory Size        : 19.41 MB (20,353,024 bytes)
-Managed GC Heap Size       : 6.99 MB (7,329,688 bytes)
+Total CPU Processor Time   : 00:00:00.2031250 (User: 00:00:00.1718750, Privileged: 00:00:00.0312500)
+Peak Physical Memory (WS)  : 54.23 MB (56,864,768 bytes)
+Current Physical Memory    : 52.95 MB (55,525,376 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,466,649,088 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,464,519,168 bytes)
+Private Memory Size        : 20.06 MB (21,032,960 bytes)
+Managed GC Heap Size       : 7.17 MB (7,518,032 bytes)
 Active Process Threads     : 8
 Garbage Collections        : Gen 0: 0, Gen 1: 0, Gen 2: 0
 
@@ -67,10 +67,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 134.43 ms
-Layout Selection           : 2.42 ms
-Scene Processing & Render  : 59.82 ms
-Total Summed Steps Time    : 196.67 ms
+DWG Loading & Parsing      : 133.27 ms
+Layout Selection           : 2.20 ms
+Scene Processing & Render  : 75.91 ms
+Total Summed Steps Time    : 211.38 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -83,19 +83,19 @@ Total Summed Steps Time    : 196.67 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-TextEntity                | 10       |             13.228 |           1.323
-LwPolyline                | 15       |              1.092 |           0.073
+TextEntity                | 10       |             11.287 |           1.129
+LwPolyline                | 15       |              1.188 |           0.079
 Line                      | 4        |              0.001 |           0.000
 ------------------------------------------------------------------------
-TOTAL                     | 29       |             14.321 |           0.494
+TOTAL                     | 29       |             12.476 |           0.430
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-TextEntity                | 10       |              3.056 |           0.306
-LwPolyline                | 15       |              2.201 |           0.147
-Line                      | 4        |              0.190 |           0.048
+TextEntity                | 10       |              3.012 |           0.301
+LwPolyline                | 15       |              2.313 |           0.154
+Line                      | 4        |              0.177 |           0.044
 ------------------------------------------------------------------------
-TOTAL                     | 29       |              5.448 |           0.188
+TOTAL                     | 29       |              5.502 |           0.190
 =========================================================================
 

@@ -6,11 +6,11 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 5436
+Process ID (PID)           : 9508
 Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\civil_example-imperial.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\civil_example-imperial.png --debug -bg=#FFFF00
-Start Time                 : 2026-06-09 15:13:40
-Total Process Run Time     : 225.28 ms
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\civil_example-imperial.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\civil_example-imperial.png --debug
+Start Time                 : 2026-06-09 16:10:31
+Total Process Run Time     : 239.18 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
@@ -26,13 +26,13 @@ Logical Processor Count    : 32
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.2343750 (User: 00:00:00.1718750, Privileged: 00:00:00.0625000)
-Peak Physical Memory (WS)  : 56.38 MB (59,113,472 bytes)
-Current Physical Memory    : 48.03 MB (50,364,416 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,459,943,936 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,450,310,144 bytes)
-Private Memory Size        : 18.85 MB (19,763,200 bytes)
-Managed GC Heap Size       : 6.24 MB (6,541,200 bytes)
+Total CPU Processor Time   : 00:00:00.2343750 (User: 00:00:00.1562500, Privileged: 00:00:00.0781250)
+Peak Physical Memory (WS)  : 57.39 MB (60,174,336 bytes)
+Current Physical Memory    : 50.68 MB (53,145,600 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,461,475,840 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,453,574,656 bytes)
+Private Memory Size        : 19.17 MB (20,099,072 bytes)
+Managed GC Heap Size       : 6.43 MB (6,737,800 bytes)
 Active Process Threads     : 8
 Garbage Collections        : Gen 0: 0, Gen 1: 0, Gen 2: 0
 
@@ -43,7 +43,7 @@ Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\d
 Input DWG File Size        : 165.62 KB (169,592 bytes)
 Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\civil_example-imperial.png
 Selected Layout            : 'Layout1'
-Target Canvas Resolution   : 2400 x 1207 px
+Target Canvas Resolution   : 2200 x 1106 px
 Bounding Box Extents       :
   Min X                    : -4.1408
   Min Y                    : -0.4746
@@ -51,9 +51,9 @@ Bounding Box Extents       :
   Max Y                    : 8.5184
   Width (Drawing Units)    : 17.8806
   Height (Drawing Units)   : 8.9930
-Scale Factor (Effective)   : 127.504723
-Offset X                   : 60.0687
-Offset Y                   : 30.1750
+Scale Factor (Effective)   : 116.835312
+Offset X                   : 55.4565
+Offset Y                   : 27.6500
 
 --------------------------------------------------------------------------------
 5. DETAILED ENTITY BREAKDOWN
@@ -68,10 +68,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 127.28 ms
-Layout Selection           : 2.43 ms
-Scene Processing & Render  : 82.62 ms
-Total Summed Steps Time    : 212.32 ms
+DWG Loading & Parsing      : 128.06 ms
+Layout Selection           : 2.56 ms
+Scene Processing & Render  : 95.45 ms
+Total Summed Steps Time    : 226.07 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -84,21 +84,21 @@ Total Summed Steps Time    : 212.32 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-LwPolyline                | 12       |              1.620 |           0.135
-Arc                       | 4        |              0.481 |           0.120
-Viewport                  | 2        |              0.437 |           0.218
-Line                      | 36       |              0.045 |           0.001
+LwPolyline                | 12       |              2.038 |           0.170
+Viewport                  | 2        |              0.503 |           0.252
+Arc                       | 4        |              0.381 |           0.095
+Line                      | 36       |              0.070 |           0.002
 ------------------------------------------------------------------------
-TOTAL                     | 54       |              2.582 |           0.048
+TOTAL                     | 54       |              2.992 |           0.055
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-LwPolyline                | 6        |              2.733 |           0.456
-Viewport                  | 1        |              0.708 |           0.708
+LwPolyline                | 6        |              2.893 |           0.482
+Viewport                  | 1        |              0.701 |           0.701
 Line                      | 18       |              0.235 |           0.013
-Arc                       | 2        |              0.201 |           0.100
+Arc                       | 2        |              0.191 |           0.095
 ------------------------------------------------------------------------
-TOTAL                     | 27       |              3.877 |           0.144
+TOTAL                     | 27       |              4.019 |           0.149
 =========================================================================
 
