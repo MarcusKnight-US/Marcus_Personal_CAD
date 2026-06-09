@@ -48,17 +48,17 @@ for file in "${dwg_files[@]}"; do
     echo "Converting: $filename"
     echo "To: $out_path"
     
-    # Run the .NET application
+    # Run the .NET application with forwarded arguments
     if [ "$IS_WINDOWS_DOTNET" = true ]; then
         # Convert WSL paths to Windows paths for dotnet.exe
         win_project_dir=$(wslpath -w "$PROJECT_DIR" 2>/dev/null || echo "$PROJECT_DIR")
         win_file=$(wslpath -w "$file" 2>/dev/null || echo "$file")
         win_out_path=$(wslpath -w "$out_path" 2>/dev/null || echo "$out_path")
         
-        "$DOTNET_CMD" run --project "$win_project_dir" -- "$win_file" "$win_out_path"
+        "$DOTNET_CMD" run --project "$win_project_dir" -- "$win_file" "$win_out_path" "$@"
     else
         # Native Linux/macOS execution
-        "$DOTNET_CMD" run --project "$PROJECT_DIR" -- "$file" "$out_path"
+        "$DOTNET_CMD" run --project "$PROJECT_DIR" -- "$file" "$out_path" "$@"
     fi
     
     if [ $? -eq 0 ]; then

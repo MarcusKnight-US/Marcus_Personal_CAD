@@ -1,0 +1,102 @@
+================================================================================
+                    DWG-TO-PNG CONVERSION DEBUG AUDIT REPORT                    
+================================================================================
+
+--------------------------------------------------------------------------------
+1. PROCESS INFORMATION
+--------------------------------------------------------------------------------
+Process Name               : DwgToPngConverter
+Process ID (PID)           : 12392
+Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\plot_screening_and_fill_patterns.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\plot_screening_and_fill_patterns.png --debug -bg=#FFFF00
+Start Time                 : 2026-06-09 15:13:45
+Total Process Run Time     : 255.40 ms
+
+--------------------------------------------------------------------------------
+2. SYSTEM & RUNTIME INFORMATION
+--------------------------------------------------------------------------------
+Operating System           : Microsoft Windows 10.0.26200
+OS Architecture            : X64
+Process Architecture       : X64
+Runtime Version            : .NET 10.0.8
+Machine Name               : FLACS2
+User Name                  : BRG
+Logical Processor Count    : 32
+
+--------------------------------------------------------------------------------
+3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
+--------------------------------------------------------------------------------
+Total CPU Processor Time   : 00:00:00.2812500 (User: 00:00:00.2031250, Privileged: 00:00:00.0781250)
+Peak Physical Memory (WS)  : 64.27 MB (67,391,488 bytes)
+Current Physical Memory    : 50.39 MB (52,842,496 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,476,553,216 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,461,242,368 bytes)
+Private Memory Size        : 19.79 MB (20,746,240 bytes)
+Managed GC Heap Size       : 7.41 MB (7,765,168 bytes)
+Active Process Threads     : 8
+Garbage Collections        : Gen 0: 0, Gen 1: 0, Gen 2: 0
+
+--------------------------------------------------------------------------------
+4. DRAWING & CONVERSION METRICS
+--------------------------------------------------------------------------------
+Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\plot_screening_and_fill_patterns.dwg
+Input DWG File Size        : 83.94 KB (85,952 bytes)
+Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\plot_screening_and_fill_patterns.png
+Selected Layout            : 'Fill Patterns'
+Target Canvas Resolution   : 2400 x 1799 px
+Bounding Box Extents       :
+  Min X                    : -1.9974
+  Min Y                    : -0.4568
+  Max X                    : 12.4882
+  Max Y                    : 10.4017
+  Width (Drawing Units)    : 14.4856
+  Height (Drawing Units)   : 10.8585
+Scale Factor (Effective)   : 157.392792
+Offset X                   : 60.0387
+Offset Y                   : 44.9750
+
+--------------------------------------------------------------------------------
+5. DETAILED ENTITY BREAKDOWN
+--------------------------------------------------------------------------------
+Total Entities Processed   : 325
+Breakdown by Entity Type:
+  Model:Solid              : 264
+  Model:TextEntity         : 58
+  Paper:Viewport           : 2
+  Paper:TextEntity         : 1
+
+--------------------------------------------------------------------------------
+6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
+--------------------------------------------------------------------------------
+DWG Loading & Parsing      : 122.23 ms
+Layout Selection           : 2.46 ms
+Scene Processing & Render  : 117.58 ms
+Total Summed Steps Time    : 242.27 ms
+
+--------------------------------------------------------------------------------
+7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
+--------------------------------------------------------------------------------
+
+=========================================================================
+                     DETAILED PERFORMANCE PROFILE                        
+=========================================================================
+
+--- Bounding Box & Extents Calculations (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+TextEntity                | 108      |             13.257 |           0.123
+Viewport                  | 2        |              0.463 |           0.231
+Solid                     | 520      |              0.061 |           0.000
+------------------------------------------------------------------------
+TOTAL                     | 630      |             13.780 |           0.022
+
+--- Entity Rendering & Drawing (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+TextEntity                | 59       |              4.135 |           0.070
+Solid                     | 264      |              2.383 |           0.009
+Viewport                  | 1        |              0.698 |           0.698
+------------------------------------------------------------------------
+TOTAL                     | 324      |              7.216 |           0.022
+=========================================================================
+

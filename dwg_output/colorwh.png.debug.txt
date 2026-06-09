@@ -1,0 +1,114 @@
+================================================================================
+                    DWG-TO-PNG CONVERSION DEBUG AUDIT REPORT                    
+================================================================================
+
+--------------------------------------------------------------------------------
+1. PROCESS INFORMATION
+--------------------------------------------------------------------------------
+Process Name               : DwgToPngConverter
+Process ID (PID)           : 3488
+Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\colorwh.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\colorwh.png --debug -bg=#FFFF00
+Start Time                 : 2026-06-09 15:13:41
+Total Process Run Time     : 703.13 ms
+
+--------------------------------------------------------------------------------
+2. SYSTEM & RUNTIME INFORMATION
+--------------------------------------------------------------------------------
+Operating System           : Microsoft Windows 10.0.26200
+OS Architecture            : X64
+Process Architecture       : X64
+Runtime Version            : .NET 10.0.8
+Machine Name               : FLACS2
+User Name                  : BRG
+Logical Processor Count    : 32
+
+--------------------------------------------------------------------------------
+3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
+--------------------------------------------------------------------------------
+Total CPU Processor Time   : 00:00:00.7187500 (User: 00:00:00.6250000, Privileged: 00:00:00.0937500)
+Peak Physical Memory (WS)  : 171.07 MB (179,384,320 bytes)
+Current Physical Memory    : 157.18 MB (164,814,848 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,488,325,120 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,473,042,944 bytes)
+Private Memory Size        : 133.39 MB (139,866,112 bytes)
+Managed GC Heap Size       : 103.19 MB (108,204,912 bytes)
+Active Process Threads     : 9
+Garbage Collections        : Gen 0: 14, Gen 1: 12, Gen 2: 4
+
+--------------------------------------------------------------------------------
+4. DRAWING & CONVERSION METRICS
+--------------------------------------------------------------------------------
+Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\colorwh.dwg
+Input DWG File Size        : 1.70 MB (1,786,976 bytes)
+Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\colorwh.png
+Selected Layout            : 'AutoCAD Color Index'
+Target Canvas Resolution   : 2400 x 1799 px
+Bounding Box Extents       :
+  Min X                    : -2.3904
+  Min Y                    : -0.4204
+  Max X                    : 12.0952
+  Max Y                    : 10.4381
+  Width (Drawing Units)    : 14.4856
+  Height (Drawing Units)   : 10.8585
+Scale Factor (Effective)   : 157.392792
+Offset X                   : 60.0387
+Offset Y                   : 44.9750
+
+--------------------------------------------------------------------------------
+5. DETAILED ENTITY BREAKDOWN
+--------------------------------------------------------------------------------
+Total Entities Processed   : 36428
+Breakdown by Entity Type:
+  Model:Solid              : 36095
+  Model:Line               : 266
+  Paper:TextEntity         : 54
+  Model:LwPolyline         : 6
+  Paper:Viewport           : 4
+  Paper:Circle             : 1
+  Paper:Line               : 1
+  Paper:MText              : 1
+
+--------------------------------------------------------------------------------
+6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
+--------------------------------------------------------------------------------
+DWG Loading & Parsing      : 389.56 ms
+Layout Selection           : 2.45 ms
+Scene Processing & Render  : 298.63 ms
+Total Summed Steps Time    : 690.64 ms
+
+--------------------------------------------------------------------------------
+7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
+--------------------------------------------------------------------------------
+
+=========================================================================
+                     DETAILED PERFORMANCE PROFILE                        
+=========================================================================
+
+--- Bounding Box & Extents Calculations (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+TextEntity                | 54       |             13.706 |           0.254
+Solid                     | 36329    |              3.925 |           0.000
+LwPolyline                | 14       |              0.420 |           0.030
+Viewport                  | 4        |              0.412 |           0.103
+MText                     | 1        |              0.118 |           0.118
+Line                      | 513      |              0.092 |           0.000
+Circle                    | 1        |              0.049 |           0.049
+------------------------------------------------------------------------
+TOTAL                     | 36916    |             18.721 |           0.001
+
+--- Entity Rendering & Drawing (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+Solid                     | 108285   |            109.545 |           0.001
+TextEntity                | 54       |              5.038 |           0.093
+MText                     | 1        |              1.082 |           1.082
+Viewport                  | 1        |              0.774 |           0.774
+Circle                    | 1        |              0.745 |           0.745
+Line                      | 799      |              0.734 |           0.001
+LwPolyline                | 18       |              0.720 |           0.040
+------------------------------------------------------------------------
+TOTAL                     | 109159   |            118.639 |           0.001
+=========================================================================
+

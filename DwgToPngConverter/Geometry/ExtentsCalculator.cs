@@ -7,10 +7,12 @@ namespace DwgToPngConverter.Geometry
 
     public static class ExtentsCalculator
     {
+        private static readonly double[] CardinalAngles = new[] { 0.0, Math.PI / 2.0, Math.PI, Math.PI * 3.0 / 2.0 };
+
         // TryGetExtents computes min/max bounds for supported entity types.
         public static bool TryGetExtents(Entity entity, out Extents extents)
         {
-            if (entity == null)
+            if (entity == null || entity.IsInvisible)
             {
                 extents = default;
                 return false;
@@ -35,6 +37,12 @@ namespace DwgToPngConverter.Geometry
                 return true;
             }
 
+            if (entity is Arc arc)
+            {
+                extents = GetArcExtents(arc);
+                return true;
+            }
+
             if (entity is Circle circle)
             {
                 double radius = circle.Radius;
@@ -56,12 +64,6 @@ namespace DwgToPngConverter.Geometry
             if (entity is Spline spline)
             {
                 extents = GetSplineExtents(spline);
-                return true;
-            }
-
-            if (entity is Arc arc)
-            {
-                extents = GetArcExtents(arc);
                 return true;
             }
 
@@ -260,8 +262,7 @@ namespace DwgToPngConverter.Geometry
                 sweep += Math.Tau;
             }
 
-            var cardinalAngles = new[] { 0.0, Math.PI / 2.0, Math.PI, Math.PI * 3.0 / 2.0 };
-            foreach (var angle in cardinalAngles)
+            foreach (var angle in CardinalAngles)
             {
                 if (ArcContainsAngle(arc.StartAngle, sweep, angle))
                 {
@@ -414,8 +415,7 @@ namespace DwgToPngConverter.Geometry
                 Math.Max(start.Y, end.Y)
             );
 
-            var cardinalAngles = new[] { 0.0, Math.PI / 2.0, Math.PI, Math.PI * 3.0 / 2.0 };
-            foreach (var angle in cardinalAngles)
+            foreach (var angle in CardinalAngles)
             {
                 if (ArcContainsAngle(startAngle, sweep, angle))
                 {
@@ -482,32 +482,25 @@ namespace DwgToPngConverter.Geometry
             double minLocalY = -0.2 * height;
             double maxLocalY = 0.8 * height;
 
-            var corners = new[]
-            {
-                new XY(minLocalX, minLocalY),
-                new XY(maxLocalX, minLocalY),
-                new XY(maxLocalX, maxLocalY),
-                new XY(minLocalX, maxLocalY)
-            };
-
             double cos = Math.Cos(rotation);
             double sin = Math.Sin(rotation);
 
-            double minX = double.MaxValue;
-            double minY = double.MaxValue;
-            double maxX = double.MinValue;
-            double maxY = double.MinValue;
+            double rx1 = minLocalX * cos - minLocalY * sin + insertPoint.X;
+            double ry1 = minLocalX * sin + minLocalY * cos + insertPoint.Y;
 
-            foreach (var p in corners)
-            {
-                double rx = p.X * cos - p.Y * sin + insertPoint.X;
-                double ry = p.X * sin + p.Y * cos + insertPoint.Y;
+            double rx2 = maxLocalX * cos - minLocalY * sin + insertPoint.X;
+            double ry2 = maxLocalX * sin + minLocalY * cos + insertPoint.Y;
 
-                if (rx < minX) minX = rx;
-                if (ry < minY) minY = ry;
-                if (rx > maxX) maxX = rx;
-                if (ry > maxY) maxY = ry;
-            }
+            double rx3 = maxLocalX * cos - maxLocalY * sin + insertPoint.X;
+            double ry3 = maxLocalX * sin + maxLocalY * cos + insertPoint.Y;
+
+            double rx4 = minLocalX * cos - maxLocalY * sin + insertPoint.X;
+            double ry4 = minLocalX * sin + maxLocalY * cos + insertPoint.Y;
+
+            double minX = Math.Min(Math.Min(rx1, rx2), Math.Min(rx3, rx4));
+            double minY = Math.Min(Math.Min(ry1, ry2), Math.Min(ry3, ry4));
+            double maxX = Math.Max(Math.Max(rx1, rx2), Math.Max(rx3, rx4));
+            double maxY = Math.Max(Math.Max(ry1, ry2), Math.Max(ry3, ry4));
 
             return new Extents(minX, minY, maxX, maxY);
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
 namespace DwgToPngConverter.Geometry
@@ -16,11 +17,23 @@ namespace DwgToPngConverter.Geometry
         private static readonly Regex _regexFormat9 = new(@"\\[A-Za-z][^;]*;", RegexOptions.Compiled);
         private static readonly Regex _regexStack = new(@"\\[Ss]([^;]+);", RegexOptions.Compiled);
 
+        private static readonly ConcurrentDictionary<string, string> _cleanCache = new();
+
         public static string CleanMText(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
+            if (_cleanCache.TryGetValue(text, out string? cached))
+                return cached;
+
+            string cleaned = CleanMTextInternal(text);
+            _cleanCache.TryAdd(text, cleaned);
+            return cleaned;
+        }
+
+        private static string CleanMTextInternal(string text)
+        {
             // Handle stacks first to preserve the fraction numbers (e.g. \S1/2; or \S1^2;)
             string cleaned = _regexStack.Replace(text, match =>
             {

@@ -1,0 +1,124 @@
+================================================================================
+                    DWG-TO-PNG CONVERSION DEBUG AUDIT REPORT                    
+================================================================================
+
+--------------------------------------------------------------------------------
+1. PROCESS INFORMATION
+--------------------------------------------------------------------------------
+Process Name               : DwgToPngConverter
+Process ID (PID)           : 16600
+Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\architectural_-_annotation_scaling_and_multileaders.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\architectural_-_annotation_scaling_and_multileaders.png --debug -bg=#FFFF00
+Start Time                 : 2026-06-09 15:13:34
+Total Process Run Time     : 326.83 ms
+
+--------------------------------------------------------------------------------
+2. SYSTEM & RUNTIME INFORMATION
+--------------------------------------------------------------------------------
+Operating System           : Microsoft Windows 10.0.26200
+OS Architecture            : X64
+Process Architecture       : X64
+Runtime Version            : .NET 10.0.8
+Machine Name               : FLACS2
+User Name                  : BRG
+Logical Processor Count    : 32
+
+--------------------------------------------------------------------------------
+3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
+--------------------------------------------------------------------------------
+Total CPU Processor Time   : 00:00:00.3437500 (User: 00:00:00.2812500, Privileged: 00:00:00.0625000)
+Peak Physical Memory (WS)  : 81.66 MB (85,622,784 bytes)
+Current Physical Memory    : 70.11 MB (73,519,104 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,483,196,928 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,470,347,776 bytes)
+Private Memory Size        : 37.55 MB (39,374,848 bytes)
+Managed GC Heap Size       : 8.61 MB (9,023,792 bytes)
+Active Process Threads     : 8
+Garbage Collections        : Gen 0: 1, Gen 1: 0, Gen 2: 0
+
+--------------------------------------------------------------------------------
+4. DRAWING & CONVERSION METRICS
+--------------------------------------------------------------------------------
+Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\architectural_-_annotation_scaling_and_multileaders.dwg
+Input DWG File Size        : 184.56 KB (188,992 bytes)
+Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\architectural_-_annotation_scaling_and_multileaders.png
+Selected Layout            : 'SECTIONS AND DETAILS'
+Target Canvas Resolution   : 2400 x 1532 px
+Bounding Box Extents       :
+  Min X                    : -1.5037
+  Min Y                    : -1.3965
+  Max X                    : 42.6002
+  Max Y                    : 26.7489
+  Width (Drawing Units)    : 44.1038
+  Height (Drawing Units)   : 28.1454
+Scale Factor (Effective)   : 51.696182
+Offset X                   : 60.0000
+Offset Y                   : 38.4941
+
+--------------------------------------------------------------------------------
+5. DETAILED ENTITY BREAKDOWN
+--------------------------------------------------------------------------------
+Total Entities Processed   : 1920
+Breakdown by Entity Type:
+  Model:Line               : 1427
+  Model:LwPolyline         : 104
+  Model:Point              : 84
+  Model:MText              : 80
+  Model:Arc                : 64
+  Model:Hatch              : 52
+  Paper:TextEntity         : 45
+  Paper:Line               : 29
+  Model:Circle             : 13
+  Model:TextEntity         : 6
+  Paper:Viewport           : 5
+  Paper:MText              : 5
+  Paper:Circle             : 4
+  Paper:LwPolyline         : 2
+
+--------------------------------------------------------------------------------
+6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
+--------------------------------------------------------------------------------
+DWG Loading & Parsing      : 162.31 ms
+Layout Selection           : 2.59 ms
+Scene Processing & Render  : 149.08 ms
+Total Summed Steps Time    : 313.97 ms
+
+--------------------------------------------------------------------------------
+7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
+--------------------------------------------------------------------------------
+
+=========================================================================
+                     DETAILED PERFORMANCE PROFILE                        
+=========================================================================
+
+--- Bounding Box & Extents Calculations (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+MText                     | 125      |             14.946 |           0.120
+LwPolyline                | 221      |              0.959 |           0.004
+Hatch                     | 107      |              0.692 |           0.006
+Viewport                  | 5        |              0.398 |           0.080
+Arc                       | 138      |              0.395 |           0.003
+Line                      | 2893     |              0.212 |           0.000
+TextEntity                | 51       |              0.099 |           0.002
+Point                     | 171      |              0.015 |           0.000
+Circle                    | 29       |              0.003 |           0.000
+------------------------------------------------------------------------
+TOTAL                     | 3740     |             17.719 |           0.005
+
+--- Entity Rendering & Drawing (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+MText                     | 325      |              6.656 |           0.020
+Line                      | 5737     |              3.361 |           0.001
+TextEntity                | 69       |              2.318 |           0.034
+LwPolyline                | 418      |              1.675 |           0.004
+Hatch                     | 208      |              1.457 |           0.007
+Viewport                  | 1        |              0.708 |           0.708
+Point                     | 336      |              0.445 |           0.001
+Arc                       | 256      |              0.409 |           0.002
+Circle                    | 56       |              0.218 |           0.004
+------------------------------------------------------------------------
+TOTAL                     | 7406     |             17.248 |           0.002
+=========================================================================
+

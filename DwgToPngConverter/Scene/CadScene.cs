@@ -52,6 +52,11 @@ namespace DwgToPngConverter.Scene
                     continue;
                 }
 
+                if (entity.IsInvisible)
+                {
+                    continue;
+                }
+
                 if (entity.Layer != null && !(entity is Viewport))
                 {
                     if (!entity.Layer.IsOn || (entity.Layer.Flags & ACadSharp.Tables.LayerFlags.Frozen) != ACadSharp.Tables.LayerFlags.None)
@@ -161,6 +166,11 @@ namespace DwgToPngConverter.Scene
         {
             var list = new List<Entity>();
 
+            if (entity == null || entity.IsInvisible)
+            {
+                return list;
+            }
+
             // Resolve ByBlock color
             ACadSharp.Color? entityColor = entity.Color;
             if (entityColor == null)
@@ -224,18 +234,6 @@ namespace DwgToPngConverter.Scene
                     LineWeight = entityLineWeight
                 });
             }
-            else if (entity is Circle circle)
-            {
-                list.Add(new Circle()
-                {
-                    Center = transform.TransformPoint(circle.Center),
-                    Radius = circle.Radius * Math.Max(Math.Abs(transform.ScaleX), Math.Abs(transform.ScaleY)),
-                    Color = entityColor.Value,
-                    Layer = entityLayer,
-                    LineType = circle.LineType,
-                    LineWeight = entityLineWeight
-                });
-            }
             else if (entity is Arc arc)
             {
                 list.Add(new Arc()
@@ -247,6 +245,18 @@ namespace DwgToPngConverter.Scene
                     Color = entityColor.Value,
                     Layer = entityLayer,
                     LineType = arc.LineType,
+                    LineWeight = entityLineWeight
+                });
+            }
+            else if (entity is Circle circle)
+            {
+                list.Add(new Circle()
+                {
+                    Center = transform.TransformPoint(circle.Center),
+                    Radius = circle.Radius * Math.Max(Math.Abs(transform.ScaleX), Math.Abs(transform.ScaleY)),
+                    Color = entityColor.Value,
+                    Layer = entityLayer,
+                    LineType = circle.LineType,
                     LineWeight = entityLineWeight
                 });
             }

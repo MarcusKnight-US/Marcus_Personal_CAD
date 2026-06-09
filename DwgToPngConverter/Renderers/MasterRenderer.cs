@@ -7,11 +7,15 @@ using ACadSharp;
 using ACadSharp.Entities;
 using ACadSharp.Objects;
 using DwgToPngConverter.Geometry;
+using DwgToPngConverter;
 
 namespace DwgToPngConverter.Renderers
 {
     public class MasterRenderer
     {
+        private static readonly float[] DashIntervals = new float[] { 12f, 12f };
+        private static readonly SKPathEffect? DashedPathEffect = SKPathEffect.CreateDash(DashIntervals, 0f);
+
         private readonly Dictionary<Type, IEntityRenderer> _rendererMap = new();
         private readonly List<IEntityRenderer> _rendererFallback = new();
         private readonly Dictionary<Type, IEntityRenderer?> _resolvedRendererCache = new();
@@ -22,8 +26,8 @@ namespace DwgToPngConverter.Renderers
         public MasterRenderer()
         {
             RegisterRenderer(new LineRenderer());
-            RegisterRenderer(new CircleRenderer());
             RegisterRenderer(new ArcRenderer());
+            RegisterRenderer(new CircleRenderer());
             RegisterRenderer(new PolylineRenderer());
             RegisterRenderer(new SplineRenderer());
             RegisterRenderer(new EllipseRenderer());
@@ -48,7 +52,7 @@ namespace DwgToPngConverter.Renderers
             _resolvedRendererCache.Clear();
         }
 
-        public void RenderAll(List<Entity> entities, BoundingBox bbox, string outputPath, string? dwgFilePath = null)
+        public void RenderAll(List<Entity> entities, BoundingBox bbox, string outputPath, string? dwgFilePath = null, ConversionDebugInfo? debugInfo = null)
         {
             if (entities == null || entities.Count == 0)
             {
@@ -70,6 +74,30 @@ namespace DwgToPngConverter.Renderers
             float scale = Math.Min(scaleX, scaleY) * 0.9f;
             float offsetX = (width - (float)bbox.Width * scale) / 2f;
             float offsetY = (height - (float)bbox.Height * scale) / 2f;
+
+            if (debugInfo != null)
+            {
+                debugInfo.ImageWidth = width;
+                debugInfo.ImageHeight = height;
+                debugInfo.BBoxMinX = bbox.MinX;
+                debugInfo.BBoxMinY = bbox.MinY;
+                debugInfo.BBoxMaxX = bbox.MaxX;
+                debugInfo.BBoxMaxY = bbox.MaxY;
+                debugInfo.BBoxWidth = bbox.Width;
+                debugInfo.BBoxHeight = bbox.Height;
+                debugInfo.ScaleFactor = scale;
+                debugInfo.OffsetX = offsetX;
+                debugInfo.OffsetY = offsetY;
+                debugInfo.TotalEntities = entities.Count;
+                foreach (var entity in entities)
+                {
+                    if (entity == null) continue;
+                    string typeName = entity.GetType().Name;
+                    if (!debugInfo.EntityCounts.ContainsKey(typeName))
+                        debugInfo.EntityCounts[typeName] = 0;
+                    debugInfo.EntityCounts[typeName]++;
+                }
+            }
 
             SKColor backgroundColor = SKColors.White;
             if (!string.IsNullOrWhiteSpace(BackgroundColorHex))
@@ -112,8 +140,12 @@ namespace DwgToPngConverter.Renderers
                 float resolvedWeight = ResolveLineWeightValue(entity);
                 paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
 
+                paint.PathEffect = CreatePathEffect(entity, context.EffectiveScale);
+
                 var renderer = FindRenderer(entity);
                 renderer?.Draw(context, entity);
+
+                paint.PathEffect = null;
 
                 sw.Stop();
                 PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
@@ -225,7 +257,7 @@ namespace DwgToPngConverter.Renderers
             return resultColor;
         }
 
-        public void RenderLayout(CadDocument doc, Layout layout, string outputPath, string? dwgFilePath = null)
+        public void RenderLayout(CadDocument doc, Layout layout, string outputPath, string? dwgFilePath = null, ConversionDebugInfo? debugInfo = null)
         {
             DwgToPngConverter.Scene.CadScene.SheetNumber = null;
 
@@ -275,6 +307,42 @@ namespace DwgToPngConverter.Renderers
             float offsetX = (width - (float)paperBBox.Width * scale) / 2f;
             float offsetY = (height - (float)paperBBox.Height * scale) / 2f;
 
+            if (debugInfo != null)
+            {
+                debugInfo.LayoutName = layout.Name;
+                debugInfo.ImageWidth = width;
+                debugInfo.ImageHeight = height;
+                debugInfo.BBoxMinX = paperBBox.MinX;
+                debugInfo.BBoxMinY = paperBBox.MinY;
+                debugInfo.BBoxMaxX = paperBBox.MaxX;
+                debugInfo.BBoxMaxY = paperBBox.MaxY;
+                debugInfo.BBoxWidth = paperBBox.Width;
+                debugInfo.BBoxHeight = paperBBox.Height;
+                debugInfo.ScaleFactor = scale;
+                debugInfo.OffsetX = offsetX;
+                debugInfo.OffsetY = offsetY;
+                
+                int totalEnts = paperScene.Entities.Count + modelScene.Entities.Count;
+                debugInfo.TotalEntities = totalEnts;
+                
+                foreach (var entity in paperScene.Entities)
+                {
+                    if (entity == null) continue;
+                    string typeName = "Paper:" + entity.GetType().Name;
+                    if (!debugInfo.EntityCounts.ContainsKey(typeName))
+                        debugInfo.EntityCounts[typeName] = 0;
+                    debugInfo.EntityCounts[typeName]++;
+                }
+                foreach (var entity in modelScene.Entities)
+                {
+                    if (entity == null) continue;
+                    string typeName = "Model:" + entity.GetType().Name;
+                    if (!debugInfo.EntityCounts.ContainsKey(typeName))
+                        debugInfo.EntityCounts[typeName] = 0;
+                    debugInfo.EntityCounts[typeName]++;
+                }
+            }
+
             // 5. Initialize Skia canvas with white background
             SKColor backgroundColor = SKColors.White;
             using var surface = SKSurface.Create(new SKImageInfo(width, height));
@@ -306,8 +374,12 @@ namespace DwgToPngConverter.Renderers
                 float resolvedWeight = ResolveLineWeightValue(entity);
                 paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
 
+                paint.PathEffect = CreatePathEffect(entity, paperContext.EffectiveScale);
+
                 var renderer = FindRenderer(entity);
                 renderer?.Draw(paperContext, entity);
+
+                paint.PathEffect = null;
 
                 sw.Stop();
                 PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
@@ -358,7 +430,7 @@ namespace DwgToPngConverter.Renderers
                         continue;
                     }
 
-                    bool useZoomToExtents = !ViewportOverlapsModelBBox(vp, modelScene.BoundingBox);
+                    bool useZoomToExtents = !ViewportOverlapsModelEntities(vp, modelScene.Entities);
                     if (useZoomToExtents)
                     {
                         // Build a context that maps the model bbox into the screen clip rect directly.
@@ -384,8 +456,12 @@ namespace DwgToPngConverter.Renderers
                         float resolvedWeight = ResolveLineWeightValue(mEntity);
                         paint.StrokeWidth = Math.Max(0.5f, OverallLineWeight * (resolvedWeight / 25f));
 
+                        paint.PathEffect = CreatePathEffect(mEntity, modelContext.EffectiveScale);
+
                         var renderer = FindRenderer(mEntity);
                         renderer?.Draw(modelContext, mEntity);
+
+                            paint.PathEffect = null;
 
                         sw.Stop();
                         PerformanceTracker.RecordRender(mEntity.GetType().Name, sw.Elapsed.TotalMilliseconds);
@@ -403,10 +479,10 @@ namespace DwgToPngConverter.Renderers
         }
 
         /// <summary>
-        /// Returns true if the viewport's view window (in model coordinates) overlaps the model bounding box.
+        /// Returns true if the viewport's view window (in model coordinates) overlaps the bounding box of any individual entity.
         /// ViewCenter is the model-space point at the center of the viewport; ViewTarget offsets the DCS origin.
         /// </summary>
-        private static bool ViewportOverlapsModelBBox(Viewport vp, BoundingBox modelBBox)
+        private static bool ViewportOverlapsModelEntities(Viewport vp, IEnumerable<Entity> entities)
         {
             if (vp.ScaleFactor <= 0) return false;
 
@@ -421,9 +497,24 @@ namespace DwgToPngConverter.Renderers
             double vpMinY = modelCenterY - halfH;
             double vpMaxY = modelCenterY + halfH;
 
-            // Rectangle intersection test
-            return vpMaxX >= modelBBox.MinX && vpMinX <= modelBBox.MaxX &&
-                   vpMaxY >= modelBBox.MinY && vpMinY <= modelBBox.MaxY;
+            foreach (var entity in entities)
+            {
+                if (entity == null) continue;
+                if (!ExtentsCalculator.TryGetExtents(entity, out var extents))
+                {
+                    continue;
+                }
+
+                // Rectangle intersection test for individual entity extents
+                bool intersect = vpMaxX >= extents.MinX && vpMinX <= extents.MaxX &&
+                                 vpMaxY >= extents.MinY && vpMinY <= extents.MaxY;
+                if (intersect)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -502,6 +593,39 @@ namespace DwgToPngConverter.Renderers
 
             // Fallback to SkiaSharp's native TryParse
             return SKColor.TryParse(hex, out color);
+        }
+
+        private static ACadSharp.Tables.LineType? ResolveLineType(Entity entity)
+        {
+            ACadSharp.Tables.LineType? ltype = entity.LineType;
+
+            if (ltype == null || ltype.Name.Equals("ByLayer", StringComparison.OrdinalIgnoreCase))
+            {
+                if (entity.Layer != null)
+                {
+                    ltype = entity.Layer.LineType;
+                }
+            }
+
+            if (ltype == null || 
+                ltype.Name.Equals("ByLayer", StringComparison.OrdinalIgnoreCase) || 
+                ltype.Name.Equals("ByBlock", StringComparison.OrdinalIgnoreCase) || 
+                ltype.Name.Equals("Continuous", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return ltype;
+        }
+
+        private static SKPathEffect? CreatePathEffect(Entity entity, float scale)
+        {
+            var ltype = ResolveLineType(entity);
+            if (ltype == null)
+            {
+                return null;
+            }
+            return DashedPathEffect;
         }
     }
 }

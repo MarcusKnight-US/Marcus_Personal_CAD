@@ -1,0 +1,134 @@
+================================================================================
+                    DWG-TO-PNG CONVERSION DEBUG AUDIT REPORT                    
+================================================================================
+
+--------------------------------------------------------------------------------
+1. PROCESS INFORMATION
+--------------------------------------------------------------------------------
+Process Name               : DwgToPngConverter
+Process ID (PID)           : 28120
+Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
+Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\tablet.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\tablet.png --debug -bg=#FFFF00
+Start Time                 : 2026-06-09 15:13:47
+Total Process Run Time     : 351.85 ms
+
+--------------------------------------------------------------------------------
+2. SYSTEM & RUNTIME INFORMATION
+--------------------------------------------------------------------------------
+Operating System           : Microsoft Windows 10.0.26200
+OS Architecture            : X64
+Process Architecture       : X64
+Runtime Version            : .NET 10.0.8
+Machine Name               : FLACS2
+User Name                  : BRG
+Logical Processor Count    : 32
+
+--------------------------------------------------------------------------------
+3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
+--------------------------------------------------------------------------------
+Total CPU Processor Time   : 00:00:00.3593750 (User: 00:00:00.3125000, Privileged: 00:00:00.0468750)
+Peak Physical Memory (WS)  : 91.58 MB (96,030,720 bytes)
+Current Physical Memory    : 77.64 MB (81,408,000 bytes)
+Peak Virtual Memory        : 2.07 TB (2,272,476,848,128 bytes)
+Current Virtual Memory     : 2.07 TB (2,272,461,467,648 bytes)
+Private Memory Size        : 45.56 MB (47,771,648 bytes)
+Managed GC Heap Size       : 10.42 MB (10,927,064 bytes)
+Active Process Threads     : 8
+Garbage Collections        : Gen 0: 3, Gen 1: 2, Gen 2: 1
+
+--------------------------------------------------------------------------------
+4. DRAWING & CONVERSION METRICS
+--------------------------------------------------------------------------------
+Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\tablet.dwg
+Input DWG File Size        : 428.38 KB (438,656 bytes)
+Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\tablet.png
+Selected Layout            : 'ANSI C Plot'
+Target Canvas Resolution   : 2400 x 1799 px
+Bounding Box Extents       :
+  Min X                    : -10.1567
+  Min Y                    : 1.2438
+  Max X                    : 27.9313
+  Max Y                    : 29.7949
+  Width (Drawing Units)    : 38.0880
+  Height (Drawing Units)   : 28.5511
+Scale Factor (Effective)   : 59.859341
+Offset X                   : 60.0388
+Offset Y                   : 44.9750
+
+--------------------------------------------------------------------------------
+5. DETAILED ENTITY BREAKDOWN
+--------------------------------------------------------------------------------
+Total Entities Processed   : 5173
+Breakdown by Entity Type:
+  Model:Line               : 3002
+  Model:LwPolyline         : 1272
+  Model:TextEntity         : 326
+  Model:Arc                : 243
+  Model:Circle             : 168
+  Model:Solid              : 81
+  Model:Ellipse            : 24
+  Model:Face3D             : 24
+  Model:Hatch              : 24
+  Model:Polyline2D         : 3
+  Paper:Viewport           : 2
+  Model:MText              : 2
+  Model:PolygonMesh        : 1
+  Model:Ole2Frame          : 1
+
+--------------------------------------------------------------------------------
+6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
+--------------------------------------------------------------------------------
+DWG Loading & Parsing      : 180.71 ms
+Layout Selection           : 2.53 ms
+Scene Processing & Render  : 155.80 ms
+Total Summed Steps Time    : 339.03 ms
+
+--------------------------------------------------------------------------------
+7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
+--------------------------------------------------------------------------------
+
+=========================================================================
+                     DETAILED PERFORMANCE PROFILE                        
+=========================================================================
+
+--- Bounding Box & Extents Calculations (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+TextEntity                | 327      |             11.937 |           0.037
+LwPolyline                | 1281     |              5.656 |           0.004
+Hatch                     | 24       |              1.232 |           0.051
+Viewport                  | 2        |              0.451 |           0.225
+Arc                       | 253      |              0.275 |           0.001
+Line                      | 3012     |              0.257 |           0.000
+MText                     | 2        |              0.169 |           0.085
+Circle                    | 171      |              0.111 |           0.001
+Ellipse                   | 24       |              0.102 |           0.004
+Solid                     | 81       |              0.060 |           0.001
+Face3D                    | 24       |              0.002 |           0.000
+Polyline2D                | 3        |              0.000 |           0.000
+PolygonMesh               | 1        |              0.000 |           0.000
+Ole2Frame                 | 1        |              0.000 |           0.000
+------------------------------------------------------------------------
+TOTAL                     | 5206     |             20.252 |           0.004
+
+--- Entity Rendering & Drawing (by Entity Type) ---
+Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
+------------------------------------------------------------------------
+LwPolyline                | 1272     |              5.499 |           0.004
+TextEntity                | 326      |              4.181 |           0.013
+Line                      | 3002     |              2.270 |           0.001
+Viewport                  | 1        |              2.061 |           2.061
+Hatch                     | 24       |              1.571 |           0.065
+Ellipse                   | 24       |              0.898 |           0.037
+MText                     | 2        |              0.758 |           0.379
+Arc                       | 243      |              0.463 |           0.002
+Circle                    | 168      |              0.371 |           0.002
+Solid                     | 81       |              0.353 |           0.004
+Face3D                    | 24       |              0.008 |           0.000
+Polyline2D                | 3        |              0.005 |           0.002
+Ole2Frame                 | 1        |              0.004 |           0.004
+PolygonMesh               | 1        |              0.003 |           0.003
+------------------------------------------------------------------------
+TOTAL                     | 5172     |             18.445 |           0.004
+=========================================================================
+
