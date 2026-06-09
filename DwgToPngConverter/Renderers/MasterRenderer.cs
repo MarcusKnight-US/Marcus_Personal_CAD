@@ -244,7 +244,7 @@ namespace DwgToPngConverter.Renderers
             modelScene.AddEntities(doc.Entities);
 
             // 3. Find paper bounds via Viewport with Id == 1
-            BoundingBox paperBBox = null;
+            BoundingBox? paperBBox = null;
             var mainVp = paperScene.Entities.OfType<Viewport>().FirstOrDefault(v => v.Id == 1);
             if (mainVp != null)
             {
