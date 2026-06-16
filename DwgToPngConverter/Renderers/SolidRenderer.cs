@@ -25,12 +25,7 @@ namespace DwgToPngConverter.Renderers
             path.LineTo(p3.X, p3.Y);
             path.Close();
 
-            using var paint = new SKPaint
-            {
-                Color = context.Paint.Color,
-                Style = SKPaintStyle.Fill,
-                IsAntialias = true
-            };
+            var paint = context.ResourceCache.GetPaint(context.Paint.Color, SKPaintStyle.Fill, isAntialias: true);
 
             context.Canvas.DrawPath(path, paint);
         }

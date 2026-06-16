@@ -33,16 +33,13 @@ namespace DwgToPngConverter.Renderers
             context.Canvas.RotateRadians((float)-angle);
 
             var typeface = FontResolver.ResolveTypeface();
-            using var font = new SKFont(typeface, screenHeight);
+            float scaleX = 1f;
             if (mtext.HorizontalWidth > 0 && mtext.HorizontalWidth <= 2.0)
             {
-                font.ScaleX = (float)mtext.HorizontalWidth;
+                scaleX = (float)mtext.HorizontalWidth;
             }
-            using var paint = new SKPaint
-            {
-                Color = context.Paint.Color,
-                IsAntialias = true
-            };
+            var font = context.ResourceCache.GetFont(typeface, screenHeight, scaleX);
+            var paint = context.ResourceCache.GetPaint(context.Paint.Color, SKPaintStyle.Fill, isAntialias: true);
 
             // Dynamic word-wrapping based on RectangleWidth
             float wrapWidth = (float)(mtext.RectangleWidth * context.EffectiveScale);

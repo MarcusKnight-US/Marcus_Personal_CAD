@@ -16,12 +16,7 @@ namespace DwgToPngConverter.Renderers
             // Screen-independent premium dot sizing for maximum clarity and clean visuals
             float radius = Math.Max(2f, context.Paint.StrokeWidth * 0.5f);
 
-            using var paint = new SKPaint
-            {
-                Color = context.Paint.Color,
-                Style = SKPaintStyle.Fill,
-                IsAntialias = true
-            };
+            var paint = context.ResourceCache.GetPaint(context.Paint.Color, SKPaintStyle.Fill, isAntialias: true);
 
             context.Canvas.DrawCircle(screenPos.X, screenPos.Y, radius, paint);
         }

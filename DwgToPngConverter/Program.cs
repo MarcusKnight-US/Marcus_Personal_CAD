@@ -113,7 +113,7 @@ class Program
                         {
                             try
                             {
-                                object val = prop.GetValue(vp);
+                                object? val = prop.GetValue(vp);
                                 Console.WriteLine($"    {prop.Name}: {val}");
                             }
                             catch {}

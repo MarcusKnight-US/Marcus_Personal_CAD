@@ -157,10 +157,7 @@ namespace DwgToPngConverter.Renderers
                 context.Canvas.Save();
                 context.Canvas.Concat(matrix);
 
-                using var paint = new SKPaint
-                {
-                    IsAntialias = true
-                };
+                var paint = context.ResourceCache.GetPaint(SKColors.Black, SKPaintStyle.Fill, isAntialias: true);
 
                 context.Canvas.DrawImage(cached.Image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
 

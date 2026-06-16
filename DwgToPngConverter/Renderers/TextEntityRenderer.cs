@@ -28,12 +28,8 @@ namespace DwgToPngConverter.Renderers
             context.Canvas.RotateRadians((float)-angle);
 
             var typeface = FontResolver.ResolveTypeface();
-            using var font = new SKFont(typeface, screenHeight);
-            using var paint = new SKPaint
-            {
-                Color = context.Paint.Color,
-                IsAntialias = true
-            };
+            var font = context.ResourceCache.GetFont(typeface, screenHeight);
+            var paint = context.ResourceCache.GetPaint(context.Paint.Color, SKPaintStyle.Fill, isAntialias: true);
 
             string cleaned = MTextHelper.CleanMText(text.Value);
             var lines = cleaned.Replace("\r", "").Split('\n');

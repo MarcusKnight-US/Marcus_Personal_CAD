@@ -13,13 +13,14 @@ namespace DwgToPngConverter.Renderers
         public float OffsetY { get; }
         public int Height { get; }
         public SKPaint Paint { get; }
+        public RenderResourceCache ResourceCache { get; }
         public string? DwgFilePath { get; }
         public Viewport? ActiveViewport { get; }
         public float TextMultiplier { get; }
 
         public float EffectiveScale => Scale * (ActiveViewport != null ? (float)ActiveViewport.ScaleFactor : 1f);
 
-        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, string? dwgFilePath = null, Viewport? activeViewport = null, float textMultiplier = 1f)
+        public RenderContext(SKCanvas canvas, BoundingBox bbox, float scale, float offsetX, float offsetY, int height, SKPaint paint, RenderResourceCache resourceCache, string? dwgFilePath = null, Viewport? activeViewport = null, float textMultiplier = 1f)
         {
             Canvas = canvas;
             BoundingBox = bbox;
@@ -28,6 +29,7 @@ namespace DwgToPngConverter.Renderers
             OffsetY = offsetY;
             Height = height;
             Paint = paint;
+            ResourceCache = resourceCache;
             DwgFilePath = dwgFilePath;
             ActiveViewport = activeViewport;
             TextMultiplier = textMultiplier;

@@ -124,7 +124,8 @@ namespace DwgToPngConverter.Renderers
                 Style = SKPaintStyle.Stroke
             };
 
-            var context = new RenderContext(canvas, bbox, scale, offsetX, offsetY, height, paint, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
+            using var cache = new RenderResourceCache();
+            var context = new RenderContext(canvas, bbox, scale, offsetX, offsetY, height, paint, cache, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
 
             foreach (var entity in entities)
             {
@@ -379,7 +380,8 @@ namespace DwgToPngConverter.Renderers
             };
 
             // Set up RenderContext for paper space entities
-            var paperContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
+            using var cache = new RenderResourceCache();
+            var paperContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, cache, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
 
             // 6. Draw all paper space entities (excluding viewports Id > 1 which are drawn separately)
             foreach (var entity in paperScene.Entities)
@@ -429,13 +431,12 @@ namespace DwgToPngConverter.Renderers
 
                     if (borderIsVisible)
                     {
-                        using var borderPaint = new SKPaint
-                        {
-                            Color = ResolveSKColor(vp, backgroundColor),
-                            StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (ResolveLineWeightValue(vp) / 25f)),
-                            Style = SKPaintStyle.Stroke,
-                            IsAntialias = true
-                        };
+                        var borderPaint = paperContext.ResourceCache.GetPaint(
+                            ResolveSKColor(vp, backgroundColor),
+                            SKPaintStyle.Stroke,
+                            isAntialias: true,
+                            strokeWidth: Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (ResolveLineWeightValue(vp) / 25f))
+                        );
                         canvas.DrawRect(screenClipRect, borderPaint);
                     }
 
@@ -456,11 +457,11 @@ namespace DwgToPngConverter.Renderers
                     {
                         // Build a context that maps the model bbox into the screen clip rect directly.
                         modelContext = BuildZoomToExtentsContext(canvas, modelScene.BoundingBox,
-                            screenClipRect, paint, dwgFilePath);
+                            screenClipRect, paint, paperContext.ResourceCache, dwgFilePath);
                     }
                     else
                     {
-                        modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, dwgFilePath, vp, AppConfig.Instance.TextSizeMultiplier);
+                        modelContext = new RenderContext(canvas, paperBBox, scale, offsetX, offsetY, height, paint, paperContext.ResourceCache, dwgFilePath, vp, AppConfig.Instance.TextSizeMultiplier);
                     }
 
                     // 7c. Clip and render model space entities
@@ -543,7 +544,7 @@ namespace DwgToPngConverter.Renderers
         /// (zoom-to-extents fallback when the viewport camera doesn't align with model coordinates).
         /// </summary>
         private static RenderContext BuildZoomToExtentsContext(SKCanvas canvas, BoundingBox modelBBox,
-            SKRect screenRect, SKPaint paint, string? dwgFilePath)
+            SKRect screenRect, SKPaint paint, RenderResourceCache cache, string? dwgFilePath)
         {
             float screenW = screenRect.Width;
             float screenH = screenRect.Height;
@@ -560,7 +561,7 @@ namespace DwgToPngConverter.Renderers
             if (canvasHeight <= 0) canvasHeight = (int)screenRect.Bottom;
 
             return new RenderContext(canvas, modelBBox, fitScale, offsetX, offsetY,
-                canvasHeight, paint, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
+                canvasHeight, paint, cache, dwgFilePath, activeViewport: null, textMultiplier: AppConfig.Instance.TextSizeMultiplier);
         }
 
         public static bool TryParseHexColor(string hex, out SKColor color)

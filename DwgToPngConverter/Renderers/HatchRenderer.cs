@@ -220,29 +220,18 @@ namespace DwgToPngConverter.Renderers
             }
 
             // Solid/Transparent Fill Setup for premium design aesthetics
-            using var fillPaint = new SKPaint
-            {
-                Color = context.Paint.Color,
-                Style = SKPaintStyle.Fill,
-                IsAntialias = true
-            };
-
-            // Set pattern transparency for sleek overlapping look
+            var fillColor = context.Paint.Color;
             if (!hatch.IsSolid)
             {
-                fillPaint.Color = new SKColor(context.Paint.Color.Red, context.Paint.Color.Green, context.Paint.Color.Blue, 90); // ~35% opacity
+                fillColor = new SKColor(fillColor.Red, fillColor.Green, fillColor.Blue, 90); // ~35% opacity
             }
+            var fillPaint = context.ResourceCache.GetPaint(fillColor, SKPaintStyle.Fill, isAntialias: true);
 
             context.Canvas.DrawPath(path, fillPaint);
 
             // Outlines are drawn cleanly with a 0.5f thin stroke to define pattern edges
-            using var strokePaint = new SKPaint
-            {
-                Color = context.Paint.Color,
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = Math.Max(0.5f, context.Paint.StrokeWidth * 0.2f),
-                IsAntialias = true
-            };
+            float strokeWidth = Math.Max(0.5f, context.Paint.StrokeWidth * 0.2f);
+            var strokePaint = context.ResourceCache.GetPaint(context.Paint.Color, SKPaintStyle.Stroke, isAntialias: true, strokeWidth: strokeWidth);
             context.Canvas.DrawPath(path, strokePaint);
         }
     }
