@@ -6,7 +6,8 @@ namespace DwgToPngConverter
 {
     public class AppConfig
     {
-        public int DefaultDpi { get; set; } = 200;
+        public int DefaultDpi { get; set; } = 96;
+        public int CompressionQuality { get; set; } = 80;
         public float TextSizeMultiplier { get; set; } = 1.0f;
         public int MinLayoutWidth { get; set; } = 1600;
         public int MaxLayoutWidth { get; set; } = 8000;

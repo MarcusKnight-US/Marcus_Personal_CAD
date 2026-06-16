@@ -1,5 +1,6 @@
 {
-  "DefaultDpi": 200,
+  "DefaultDpi": 90,
+  "CompressionQuality": 80,
   "TextSizeMultiplier": 1.0,
   "MinLayoutWidth": 1600,
   "MaxLayoutWidth": 8000,

@@ -152,7 +152,7 @@ namespace DwgToPngConverter.Renderers
             }
 
             using var image = surface.Snapshot();
-            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var data = image.Encode(SKEncodedImageFormat.Jpeg, AppConfig.Instance.CompressionQuality);
             using var stream = File.OpenWrite(outputPath);
             data.SaveTo(stream);
         }
@@ -494,7 +494,7 @@ namespace DwgToPngConverter.Renderers
 
             // 8. Save snapshot
             using var image = surface.Snapshot();
-            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var data = image.Encode(SKEncodedImageFormat.Jpeg, AppConfig.Instance.CompressionQuality);
             using var stream = File.OpenWrite(outputPath);
             data.SaveTo(stream);
         }

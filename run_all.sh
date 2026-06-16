@@ -35,30 +35,45 @@ dwg_files=("$DWG_EXAMPLES_DIR"/*.dwg)
 
 echo "Found ${#dwg_files[@]} DWG files to convert."
 
+echo "Building project..."
+if [ "$IS_WINDOWS_DOTNET" = true ]; then
+    win_project_dir=$(wslpath -w "$PROJECT_DIR" 2>/dev/null || echo "$PROJECT_DIR")
+    "$DOTNET_CMD" build "$win_project_dir" -c Debug
+else
+    "$DOTNET_CMD" build "$PROJECT_DIR" -c Debug
+fi
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: Build failed. Exiting." >&2
+    exit 1
+fi
+
 success_count=0
 fail_count=0
 
+DLL_PATH="$PROJECT_DIR/bin/Debug/net10.0/DwgToPngConverter.dll"
+
 for file in "${dwg_files[@]}"; do
     filename=$(basename "$file")
-    png_name="${filename%.*}.png"
-    out_path="$OUTPUT_DIR/$png_name"
+    jpg_name="${filename%.*}.jpg"
+    out_path="$OUTPUT_DIR/$jpg_name"
     
     echo ""
     echo "--------------------------------------------------"
     echo "Converting: $filename"
     echo "To: $out_path"
     
-    # Run the .NET application with forwarded arguments
+    # Run the compiled .NET application with forwarded arguments
     if [ "$IS_WINDOWS_DOTNET" = true ]; then
         # Convert WSL paths to Windows paths for dotnet.exe
-        win_project_dir=$(wslpath -w "$PROJECT_DIR" 2>/dev/null || echo "$PROJECT_DIR")
+        win_dll_path=$(wslpath -w "$DLL_PATH" 2>/dev/null || echo "$DLL_PATH")
         win_file=$(wslpath -w "$file" 2>/dev/null || echo "$file")
         win_out_path=$(wslpath -w "$out_path" 2>/dev/null || echo "$out_path")
         
-        "$DOTNET_CMD" run --project "$win_project_dir" -- "$win_file" "$win_out_path" "$@"
+        "$DOTNET_CMD" "$win_dll_path" "$win_file" "$win_out_path" "$@"
     else
         # Native Linux/macOS execution
-        "$DOTNET_CMD" run --project "$PROJECT_DIR" -- "$file" "$out_path" "$@"
+        "$DOTNET_CMD" "$DLL_PATH" "$file" "$out_path" "$@"
     fi
     
     if [ $? -eq 0 ]; then

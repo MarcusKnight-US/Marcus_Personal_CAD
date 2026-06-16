@@ -154,6 +154,14 @@ class Program
                     enableDebug = true;
                 }
             }
+            else if (arg.StartsWith("--dpi=",        StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(arg[6..], out int parsedDpi)) AppConfig.Instance.DefaultDpi = parsedDpi;
+            }
+            else if (arg.Equals("--dpi",             StringComparison.OrdinalIgnoreCase))
+            {
+                if (i + 1 < args.Length && int.TryParse(args[++i], out int parsedDpi)) AppConfig.Instance.DefaultDpi = parsedDpi;
+            }
             else if (!arg.StartsWith("-"))
             {
                 if (positionalIndex == 0)
@@ -167,6 +175,11 @@ class Program
                     positionalIndex++;
                 }
             }
+        }
+
+        if (outputPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+        {
+            outputPath = Path.ChangeExtension(outputPath, ".jpg");
         }
 
         if (Directory.Exists(inputPath))
@@ -187,8 +200,8 @@ class Program
             foreach (var file in dwgFiles)
             {
                 string filename = Path.GetFileName(file);
-                string pngName = Path.GetFileNameWithoutExtension(file) + ".png";
-                string outPath = Path.Combine(outputPath, pngName);
+                string jpgName = Path.GetFileNameWithoutExtension(file) + ".jpg";
+                string outPath = Path.Combine(outputPath, jpgName);
 
                 Console.WriteLine("\n--------------------------------------------------");
                 Console.WriteLine($"Converting: {filename}");
