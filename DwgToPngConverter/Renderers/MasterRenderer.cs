@@ -8,6 +8,8 @@ using ACadSharp.Entities;
 using ACadSharp.Objects;
 using DwgToPngConverter.Geometry;
 using DwgToPngConverter;
+using CSMath;
+using BoundingBox = DwgToPngConverter.Geometry.BoundingBox;
 
 namespace DwgToPngConverter.Renderers
 {
@@ -129,27 +131,7 @@ namespace DwgToPngConverter.Renderers
 
             foreach (var entity in entities)
             {
-                if (entity == null)
-                {
-                    continue;
-                }
-
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-
-                paint.Color = ResolveSKColor(entity, backgroundColor);
-                
-                float resolvedWeight = ResolveLineWeightValue(entity);
-                paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
-
-                paint.PathEffect = CreatePathEffect(entity, context.EffectiveScale);
-
-                var renderer = FindRenderer(entity);
-                renderer?.Draw(context, entity);
-
-                paint.PathEffect = null;
-
-                sw.Stop();
-                PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+                RenderEntity(context, entity, backgroundColor);
             }
 
             using var image = surface.Snapshot();
@@ -179,15 +161,25 @@ namespace DwgToPngConverter.Renderers
             return fallbackRenderer;
         }
 
-        private static float ResolveLineWeightValue(Entity entity)
+        private static float ResolveLineWeightValue(Entity entity, ACadSharp.Tables.Layer? overrideLayer = null, LineWeightType? overrideLineWeight = null)
         {
             LineWeightType lineWeight = entity.LineWeight;
 
+            if (lineWeight == LineWeightType.ByBlock && overrideLineWeight != null)
+            {
+                lineWeight = overrideLineWeight.Value;
+            }
+
             if (lineWeight == LineWeightType.ByLayer)
             {
-                if (entity.Layer != null)
+                var layer = entity.Layer;
+                if (layer != null && layer.Name == "0" && overrideLayer != null)
                 {
-                    lineWeight = entity.Layer.LineWeight;
+                    layer = overrideLayer;
+                }
+                if (layer != null)
+                {
+                    lineWeight = layer.LineWeight;
                 }
             }
 
@@ -204,7 +196,7 @@ namespace DwgToPngConverter.Renderers
             }
         }
 
-        private static SKColor ResolveSKColor(Entity entity, SKColor backgroundColor)
+        private static SKColor ResolveSKColor(Entity entity, SKColor backgroundColor, ACadSharp.Color? overrideColor = null, ACadSharp.Tables.Layer? overrideLayer = null)
         {
             float bgBrightness = (backgroundColor.Red * 0.299f + backgroundColor.Green * 0.587f + backgroundColor.Blue * 0.114f) / 255f;
             SKColor defaultColor = bgBrightness < 0.5f ? SKColors.White : SKColors.Black;
@@ -213,15 +205,25 @@ namespace DwgToPngConverter.Renderers
             ACadSharp.Color? color = entity.Color;
             if (color == null || color.Value.IsByLayer)
             {
-                if (entity.Layer != null)
+                var layer = entity.Layer;
+                if (layer != null && layer.Name == "0" && overrideLayer != null)
                 {
-                    color = entity.Layer.Color;
+                    layer = overrideLayer;
+                }
+                if (layer != null)
+                {
+                    color = layer.Color;
                 }
             }
 
             if (color != null)
             {
                 var c = color.Value;
+                if (c.IsByBlock && overrideColor != null)
+                {
+                    c = overrideColor.Value;
+                }
+
                 if (c.IsTrueColor)
                 {
                     resultColor = new SKColor(c.R, c.G, c.B);
@@ -391,21 +393,7 @@ namespace DwgToPngConverter.Renderers
                     continue;
                 }
 
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-
-                paint.Color = ResolveSKColor(entity, backgroundColor);
-                float resolvedWeight = ResolveLineWeightValue(entity);
-                paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
-
-                paint.PathEffect = CreatePathEffect(entity, paperContext.EffectiveScale);
-
-                var renderer = FindRenderer(entity);
-                renderer?.Draw(paperContext, entity);
-
-                paint.PathEffect = null;
-
-                sw.Stop();
-                PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+                RenderEntity(paperContext, entity, backgroundColor);
             }
 
             // 7. Render Model Space inside each Viewport (Id > 1)
@@ -470,23 +458,7 @@ namespace DwgToPngConverter.Renderers
 
                     foreach (var mEntity in modelScene.Entities)
                     {
-                        if (mEntity == null) continue;
-
-                        var sw = System.Diagnostics.Stopwatch.StartNew();
-
-                        paint.Color = ResolveSKColor(mEntity, backgroundColor);
-                        float resolvedWeight = ResolveLineWeightValue(mEntity);
-                        paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
-
-                        paint.PathEffect = CreatePathEffect(mEntity, modelContext.EffectiveScale);
-
-                        var renderer = FindRenderer(mEntity);
-                        renderer?.Draw(modelContext, mEntity);
-
-                            paint.PathEffect = null;
-
-                        sw.Stop();
-                        PerformanceTracker.RecordRender(mEntity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+                        RenderEntity(modelContext, mEntity, backgroundColor);
                     }
 
                     canvas.Restore();
@@ -644,6 +616,372 @@ namespace DwgToPngConverter.Renderers
         {
             var ltype = ResolveLineType(entity);
             return DashedPathEffect;
+        }
+
+        private void RenderEntity(RenderContext context, Entity entity, SKColor backgroundColor)
+        {
+            if (entity == null || entity.IsInvisible)
+            {
+                return;
+            }
+
+            // Resolve Layer "0" inheritance
+            var resolvedLayer = entity.Layer;
+            if (resolvedLayer != null && resolvedLayer.Name == "0" && context.OverrideLayer != null)
+            {
+                resolvedLayer = context.OverrideLayer;
+            }
+
+            if (resolvedLayer != null && !(entity is Viewport))
+            {
+                if (!resolvedLayer.IsOn || (resolvedLayer.Flags & ACadSharp.Tables.LayerFlags.Frozen) != ACadSharp.Tables.LayerFlags.None)
+                {
+                    return;
+                }
+            }
+
+            if (entity is Insert insert)
+            {
+                RenderInsert(context, insert, backgroundColor);
+            }
+            else if (entity is Dimension dimension)
+            {
+                RenderDimension(context, dimension, backgroundColor);
+            }
+            else if (entity is MultiLeader mleader)
+            {
+                RenderMultiLeader(context, mleader, backgroundColor);
+            }
+            else
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                var paint = context.Paint;
+                paint.Color = ResolveSKColor(entity, backgroundColor, context.OverrideColor, context.OverrideLayer);
+
+                float resolvedWeight = ResolveLineWeightValue(entity, context.OverrideLayer, context.OverrideLineWeight);
+                paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
+
+                paint.PathEffect = CreatePathEffect(entity, context.EffectiveScale);
+
+                var renderer = FindRenderer(entity);
+                renderer?.Draw(context, entity);
+
+                paint.PathEffect = null;
+
+                sw.Stop();
+                PerformanceTracker.RecordRender(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+            }
+        }
+
+        private void RenderInsert(RenderContext context, Insert insert, SKColor backgroundColor)
+        {
+            if (insert.Block == null) return;
+
+            // Resolve overrides for the block contents
+            ACadSharp.Color? childOverrideColor = insert.Color;
+            if (childOverrideColor == null) childOverrideColor = ACadSharp.Color.ByLayer;
+            if (childOverrideColor.Value.IsByBlock && context.OverrideColor != null)
+            {
+                childOverrideColor = context.OverrideColor;
+            }
+
+            ACadSharp.Tables.Layer? childOverrideLayer = insert.Layer;
+            if (childOverrideLayer != null && childOverrideLayer.Name == "0" && context.OverrideLayer != null)
+            {
+                childOverrideLayer = context.OverrideLayer;
+            }
+
+            LineWeightType childOverrideLineWeight = insert.LineWeight;
+            if (childOverrideLineWeight == LineWeightType.ByBlock && context.OverrideLineWeight != null)
+            {
+                childOverrideLineWeight = context.OverrideLineWeight.Value;
+            }
+
+            var attribDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (insert.Attributes != null)
+            {
+                foreach (var attr in insert.Attributes)
+                {
+                    if (attr != null && attr.Tag != null)
+                    {
+                        attribDict[attr.Tag] = attr.Value ?? "";
+                    }
+                }
+            }
+            if (context.AttributeValues != null)
+            {
+                foreach (var kvp in context.AttributeValues)
+                {
+                    attribDict[kvp.Key] = kvp.Value;
+                }
+            }
+
+            int colCount = insert.ColumnCount == 0 ? 1 : insert.ColumnCount;
+            int rowCount = insert.RowCount == 0 ? 1 : insert.RowCount;
+            double colSpacing = insert.ColumnSpacing;
+            double rowSpacing = insert.RowSpacing;
+
+            foreach (var entity in insert.Block.Entities)
+            {
+                if (entity == null) continue;
+
+                for (int col = 0; col < colCount; col++)
+                {
+                    for (int row = 0; row < rowCount; row++)
+                    {
+                        var localTransform = new Transformation(
+                            insert.XScale, insert.YScale, insert.ZScale,
+                            insert.Rotation,
+                            insert.InsertPoint,
+                            colSpacing, rowSpacing,
+                            col, row
+                        );
+
+                        var combinedTransform = localTransform.Combine(context.ActiveTransformation);
+
+                        var childContext = context.WithTransformationAndOverrides(
+                            combinedTransform,
+                            childOverrideColor,
+                            childOverrideLayer,
+                            childOverrideLineWeight,
+                            attribDict
+                        );
+
+                        RenderEntity(childContext, entity, backgroundColor);
+                    }
+                }
+            }
+        }
+
+        private void RenderDimension(RenderContext context, Dimension dimension, SKColor backgroundColor)
+        {
+            if (dimension == null || dimension.Block == null) return;
+
+            ACadSharp.Color? dimensionColor = dimension.Color;
+            if (dimensionColor == null) dimensionColor = ACadSharp.Color.ByLayer;
+            if (dimensionColor.Value.IsByBlock && context.OverrideColor != null)
+            {
+                dimensionColor = context.OverrideColor;
+            }
+
+            ACadSharp.Tables.Layer dimensionLayer = dimension.Layer;
+            if (dimensionLayer != null && dimensionLayer.Name == "0" && context.OverrideLayer != null)
+            {
+                dimensionLayer = context.OverrideLayer;
+            }
+
+            LineWeightType dimensionLineWeight = dimension.LineWeight;
+            if (dimensionLineWeight == LineWeightType.ByBlock && context.OverrideLineWeight != null)
+            {
+                dimensionLineWeight = context.OverrideLineWeight.Value;
+            }
+
+            foreach (var entity in dimension.Block.Entities)
+            {
+                if (entity == null) continue;
+
+                var childContext = context.WithTransformationAndOverrides(
+                    context.CurrentTransformation,
+                    dimensionColor,
+                    dimensionLayer,
+                    dimensionLineWeight,
+                    context.AttributeValues
+                );
+
+                RenderEntity(childContext, entity, backgroundColor);
+            }
+        }
+
+        private void RenderMultiLeader(RenderContext context, MultiLeader mleader, SKColor backgroundColor)
+        {
+            if (mleader == null || mleader.ContextData == null) return;
+
+            ACadSharp.Color? mleaderColor = mleader.Color;
+            if (mleaderColor == null) mleaderColor = ACadSharp.Color.ByLayer;
+            if (mleaderColor.Value.IsByBlock && context.OverrideColor != null)
+            {
+                mleaderColor = context.OverrideColor;
+            }
+
+            ACadSharp.Tables.Layer mleaderLayer = mleader.Layer;
+            if (mleaderLayer != null && mleaderLayer.Name == "0" && context.OverrideLayer != null)
+            {
+                mleaderLayer = context.OverrideLayer;
+            }
+
+            LineWeightType mleaderLineWeight = mleader.LineWeight;
+            if (mleaderLineWeight == LineWeightType.ByBlock && context.OverrideLineWeight != null)
+            {
+                mleaderLineWeight = context.OverrideLineWeight.Value;
+            }
+
+            var paint = context.Paint;
+            var resolvedColor = ResolveSKColor(mleader, backgroundColor, mleaderColor, mleaderLayer);
+            paint.Color = resolvedColor;
+
+            float resolvedWeight = ResolveLineWeightValue(mleader, context.OverrideLayer, mleaderLineWeight);
+            paint.StrokeWidth = Math.Max(AppConfig.Instance.MinLineWeight, OverallLineWeight * (resolvedWeight / 25f));
+            paint.PathEffect = CreatePathEffect(mleader, context.EffectiveScale);
+
+            // 1. Leader Lines and Landing Lines
+            if (mleader.ContextData.LeaderRoots != null)
+            {
+                foreach (var root in mleader.ContextData.LeaderRoots)
+                {
+                    if (root == null || root.Lines == null) continue;
+
+                    var connectionPoint = root.ConnectionPoint;
+                    var direction = root.Direction;
+                    double landingDistance = root.LandingDistance;
+                    var landingStart = new XYZ(
+                        connectionPoint.X - direction.X * landingDistance,
+                        connectionPoint.Y - direction.Y * landingDistance,
+                        connectionPoint.Z - direction.Z * landingDistance
+                    );
+
+                    if (landingDistance > 0)
+                    {
+                        var start = context.ToScreenPoint(landingStart);
+                        var end = context.ToScreenPoint(connectionPoint);
+                        context.Canvas.DrawLine(start, end, paint);
+                    }
+
+                    foreach (var line in root.Lines)
+                    {
+                        if (line == null || line.Points == null || line.Points.Count == 0) continue;
+
+                        for (int i = 1; i < line.Points.Count; i++)
+                        {
+                            var start = context.ToScreenPoint(line.Points[i - 1]);
+                            var end = context.ToScreenPoint(line.Points[i]);
+                            context.Canvas.DrawLine(start, end, paint);
+                        }
+
+                        var lastPt = line.Points[line.Points.Count - 1];
+                        var connectStart = context.ToScreenPoint(lastPt);
+                        var connectEnd = context.ToScreenPoint(landingStart);
+                        context.Canvas.DrawLine(connectStart, connectEnd, paint);
+
+                        var p0 = line.Points[0];
+                        var p1 = line.Points.Count > 1 ? line.Points[1] : landingStart;
+                        double dx = p1.X - p0.X;
+                        double dy = p1.Y - p0.Y;
+                        double len = Math.Sqrt(dx * dx + dy * dy);
+                        if (len > 0)
+                        {
+                            double vx = dx / len;
+                            double vy = dy / len;
+
+                            double arrowSize = 1.5;
+                            if (line.ArrowheadSize > 0)
+                                arrowSize = line.ArrowheadSize;
+                            else if (mleader.ContextData.ArrowheadSize > 0)
+                                arrowSize = mleader.ContextData.ArrowheadSize;
+
+                            double cos30 = Math.Cos(Math.PI / 6.0);
+                            double sin30 = Math.Sin(Math.PI / 6.0);
+
+                            double w1x = vx * cos30 - vy * sin30;
+                            double w1y = vx * sin30 + vy * cos30;
+
+                            double w2x = vx * cos30 - vy * (-sin30);
+                            double w2y = vx * (-sin30) + vy * cos30;
+
+                            var wingEnd1 = new XYZ(p0.X + w1x * arrowSize, p0.Y + w1y * arrowSize, p0.Z);
+                            var wingEnd2 = new XYZ(p0.X + w2x * arrowSize, p0.Y + w2y * arrowSize, p0.Z);
+
+                            var p0Screen = context.ToScreenPoint(p0);
+                            var w1Screen = context.ToScreenPoint(wingEnd1);
+                            var w2Screen = context.ToScreenPoint(wingEnd2);
+
+                            using var arrowheadPath = new SKPath();
+                            arrowheadPath.MoveTo(p0Screen.X, p0Screen.Y);
+                            arrowheadPath.LineTo(w1Screen.X, w1Screen.Y);
+                            arrowheadPath.LineTo(w2Screen.X, w2Screen.Y);
+                            arrowheadPath.Close();
+
+                            var fillPaint = context.ResourceCache.GetPaint(resolvedColor, SKPaintStyle.Fill, isAntialias: true);
+                            context.Canvas.DrawPath(arrowheadPath, fillPaint);
+                        }
+                    }
+                }
+            }
+
+            paint.PathEffect = null;
+
+            // 2. Content
+            if (mleader.ContentType == LeaderContentType.MText && !string.IsNullOrEmpty(mleader.ContextData.TextLabel))
+            {
+                var attachment = AttachmentPointType.TopLeft;
+                if (mleader.ContextData.TextAttachmentPoint == ACadSharp.TextAttachmentPointType.Center)
+                    attachment = AttachmentPointType.TopCenter;
+                else if (mleader.ContextData.TextAttachmentPoint == ACadSharp.TextAttachmentPointType.Right)
+                    attachment = AttachmentPointType.TopRight;
+
+                var mtext = new MText()
+                {
+                    Value = mleader.ContextData.TextLabel,
+                    InsertPoint = mleader.ContextData.TextLocation,
+                    Height = mleader.ContextData.TextHeight > 0 ? mleader.ContextData.TextHeight : 1.0,
+                    AlignmentPoint = new XYZ(Math.Cos(mleader.ContextData.TextRotation), Math.Sin(mleader.ContextData.TextRotation), 0.0),
+                    AttachmentPoint = attachment,
+                    RectangleWidth = mleader.ContextData.BoundaryWidth,
+                    Color = mleaderColor.Value,
+                    Layer = mleaderLayer,
+                    LineType = mleader.LineType,
+                    LineWeight = mleaderLineWeight
+                };
+
+                var childContext = context.WithTransformationAndOverrides(
+                    context.CurrentTransformation,
+                    mleaderColor,
+                    mleaderLayer,
+                    mleaderLineWeight,
+                    context.AttributeValues
+                );
+                RenderEntity(childContext, mtext, backgroundColor);
+            }
+            else if (mleader.ContentType == LeaderContentType.Block && mleader.ContextData.BlockContent != null)
+            {
+                var insertBlock = new Insert(mleader.ContextData.BlockContent)
+                {
+                    InsertPoint = mleader.ContextData.BlockContentLocation,
+                    XScale = mleader.ContextData.BlockContentScale.X,
+                    YScale = mleader.ContextData.BlockContentScale.Y,
+                    ZScale = mleader.ContextData.BlockContentScale.Z,
+                    Rotation = mleader.ContextData.BlockContentRotation,
+                    Color = mleaderColor.Value,
+                    Layer = mleaderLayer,
+                    LineType = mleader.LineType,
+                    LineWeight = mleaderLineWeight
+                };
+
+                var mleaderAttribDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                if (mleader.BlockAttributes != null)
+                {
+                    foreach (var attr in mleader.BlockAttributes)
+                    {
+                        if (attr != null && attr.AttributeDefinition != null)
+                        {
+                            string tag = attr.AttributeDefinition.Tag ?? "";
+                            if (!string.IsNullOrEmpty(tag))
+                            {
+                                mleaderAttribDict[tag] = attr.Text ?? "";
+                            }
+                        }
+                    }
+                }
+
+                var childContext = context.WithTransformationAndOverrides(
+                    context.CurrentTransformation,
+                    mleaderColor,
+                    mleaderLayer,
+                    mleaderLineWeight,
+                    mleaderAttribDict
+                );
+                RenderEntity(childContext, insertBlock, backgroundColor);
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace DwgToPngConverter.Renderers
             // Since our screen coordinates invert the Y-axis (Y goes down),
             // the angle direction is reversed. We must negate both the start angle
             // and the sweep angle to render the arc in the correct position and orientation.
-            float startAngle = (float)(-arc.StartAngle * 180.0 / Math.PI);
+            float startAngle = (float)(-(arc.StartAngle + context.CurrentTransformation.Rotation) * 180.0 / Math.PI);
             float sweepAngle = (float)(-sweep * 180.0 / Math.PI);
 
             using var path = new SKPath();

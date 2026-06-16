@@ -138,6 +138,11 @@ namespace DwgToPngConverter.Renderers
                 // E = scale * VVector.Y
                 // F = -scale * (InsertionPoint.Y + h * VVector.Y) + height - offsetY + minY * scale
 
+                var activeTrans = context.ActiveTransformation;
+                var insertPoint = activeTrans.TransformPoint(rasterImage.InsertPoint);
+                var uTrans = activeTrans.TransformVector(rasterImage.UVector);
+                var vTrans = activeTrans.TransformVector(rasterImage.VVector);
+
                 float scale = context.Scale;
                 float offsetX = context.OffsetX;
                 float offsetY = context.OffsetY;
@@ -145,12 +150,12 @@ namespace DwgToPngConverter.Renderers
                 double minY = context.BoundingBox.MinY;
                 int canvasHeight = context.Height;
 
-                float a = (float)(scale * rasterImage.UVector.X);
-                float b = (float)(-scale * rasterImage.VVector.X);
-                float c = (float)(scale * (rasterImage.InsertPoint.X + h * rasterImage.VVector.X) + offsetX - minX * scale);
-                float d = (float)(-scale * rasterImage.UVector.Y);
-                float e = (float)(scale * rasterImage.VVector.Y);
-                float f = (float)(-scale * (rasterImage.InsertPoint.Y + h * rasterImage.VVector.Y) + canvasHeight - offsetY + minY * scale);
+                float a = (float)(scale * uTrans.X);
+                float b = (float)(-scale * vTrans.X);
+                float c = (float)(scale * (insertPoint.X + h * vTrans.X) + offsetX - minX * scale);
+                float d = (float)(-scale * uTrans.Y);
+                float e = (float)(scale * vTrans.Y);
+                float f = (float)(-scale * (insertPoint.Y + h * vTrans.Y) + canvasHeight - offsetY + minY * scale);
 
                 var matrix = new SKMatrix(a, b, c, d, e, f, 0f, 0f, 1f);
 

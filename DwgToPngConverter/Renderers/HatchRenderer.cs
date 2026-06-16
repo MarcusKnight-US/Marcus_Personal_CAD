@@ -46,14 +46,14 @@ namespace DwgToPngConverter.Renderers
                             double sweep = arcEdge.EndAngle - arcEdge.StartAngle;
                             if (sweep < 0) sweep += Math.Tau;
 
-                            float startAngle = (float)(-arcEdge.StartAngle * 180.0 / Math.PI);
+                            float startAngle = (float)(-(arcEdge.StartAngle + context.CurrentTransformation.Rotation) * 180.0 / Math.PI);
                             float sweepAngle = (float)(-sweep * 180.0 / Math.PI);
 
                             if (!arcEdge.CounterClockWise)
                             {
                                 sweep = arcEdge.StartAngle - arcEdge.EndAngle;
                                 if (sweep < 0) sweep += Math.Tau;
-                                startAngle = (float)(-arcEdge.EndAngle * 180.0 / Math.PI);
+                                startAngle = (float)(-(arcEdge.EndAngle + context.CurrentTransformation.Rotation) * 180.0 / Math.PI);
                                 sweepAngle = (float)(sweep * 180.0 / Math.PI);
                             }
 
@@ -193,7 +193,7 @@ namespace DwgToPngConverter.Renderers
                             var oval = new SKRect(center.X - radius, center.Y - radius, center.X + radius, center.Y + radius);
                             double sweep = arc.EndAngle - arc.StartAngle;
                             if (sweep < 0) sweep += Math.Tau;
-                            float startAngle = (float)(-arc.StartAngle * 180.0 / Math.PI);
+                            float startAngle = (float)(-(arc.StartAngle + context.CurrentTransformation.Rotation) * 180.0 / Math.PI);
                             float sweepAngle = (float)(-sweep * 180.0 / Math.PI);
                             
                             var pStart = context.ToScreenPoint(

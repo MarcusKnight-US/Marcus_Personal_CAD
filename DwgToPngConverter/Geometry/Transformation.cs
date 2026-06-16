@@ -5,15 +5,33 @@ namespace DwgToPngConverter.Geometry
 {
     public readonly struct Transformation
     {
-        public double ScaleX { get; }
-        public double ScaleY { get; }
+        public double M11 { get; }
+        public double M12 { get; }
+        public double M21 { get; }
+        public double M22 { get; }
+        public double M31 { get; }
+        public double M32 { get; }
         public double ScaleZ { get; }
-        public double Rotation { get; }
-        public XYZ InsertPoint { get; }
-        public double OffsetX { get; }
-        public double OffsetY { get; }
-        public double Cos { get; }
-        public double Sin { get; }
+        public double TranslateZ { get; }
+
+        public static readonly Transformation Identity = new Transformation(1, 0, 0, 1, 0, 0, 1, 0);
+
+        public double ScaleX => Math.Sqrt(M11 * M11 + M12 * M12);
+        public double ScaleY => Math.Sqrt(M21 * M21 + M22 * M22);
+        public double Rotation => Math.Atan2(M12, M11);
+
+        public Transformation(
+            double m11, double m12,
+            double m21, double m22,
+            double m31, double m32,
+            double scaleZ = 1.0, double translateZ = 0.0)
+        {
+            M11 = m11; M12 = m12;
+            M21 = m21; M22 = m22;
+            M31 = m31; M32 = m32;
+            ScaleZ = scaleZ;
+            TranslateZ = translateZ;
+        }
 
         public Transformation(
             double scaleX, double scaleY, double scaleZ,
@@ -22,52 +40,63 @@ namespace DwgToPngConverter.Geometry
             double colSpacing = 0.0, double rowSpacing = 0.0,
             int colIndex = 0, int rowIndex = 0)
         {
-            ScaleX = scaleX;
-            ScaleY = scaleY;
+            double cos = Math.Cos(rotation);
+            double sin = Math.Sin(rotation);
+            double offsetX = colIndex * colSpacing;
+            double offsetY = rowIndex * rowSpacing;
+
+            M11 = scaleX * cos;
+            M12 = scaleX * sin;
+            M21 = -scaleY * sin;
+            M22 = scaleY * cos;
+            M31 = offsetX * cos - offsetY * sin + insertPoint.X;
+            M32 = offsetX * sin + offsetY * cos + insertPoint.Y;
             ScaleZ = scaleZ;
-            Rotation = rotation;
-            InsertPoint = insertPoint;
-            OffsetX = colIndex * colSpacing;
-            OffsetY = rowIndex * rowSpacing;
-            Cos = Math.Cos(rotation);
-            Sin = Math.Sin(rotation);
+            TranslateZ = insertPoint.Z;
         }
 
         public XYZ TransformPoint(XYZ point)
         {
-            double x = point.X * ScaleX + OffsetX;
-            double y = point.Y * ScaleY + OffsetY;
-            double z = point.Z * ScaleZ;
-
-            double rx = x * Cos - y * Sin;
-            double ry = x * Sin + y * Cos;
-            double rz = z;
-
-            return new XYZ(rx + InsertPoint.X, ry + InsertPoint.Y, rz + InsertPoint.Z);
+            double x = point.X * M11 + point.Y * M21 + M31;
+            double y = point.X * M12 + point.Y * M22 + M32;
+            double z = point.Z * ScaleZ + TranslateZ;
+            return new XYZ(x, y, z);
         }
 
         public XY TransformPoint(XY point)
         {
-            double x = point.X * ScaleX + OffsetX;
-            double y = point.Y * ScaleY + OffsetY;
-
-            double rx = x * Cos - y * Sin;
-            double ry = x * Sin + y * Cos;
-
-            return new XY(rx + InsertPoint.X, ry + InsertPoint.Y);
+            double x = point.X * M11 + point.Y * M21 + M31;
+            double y = point.X * M12 + point.Y * M22 + M32;
+            return new XY(x, y);
         }
 
         public XYZ TransformVector(XYZ vector)
         {
-            double x = vector.X * ScaleX;
-            double y = vector.Y * ScaleY;
+            double x = vector.X * M11 + vector.Y * M21;
+            double y = vector.X * M12 + vector.Y * M22;
             double z = vector.Z * ScaleZ;
+            return new XYZ(x, y, z);
+        }
 
-            double rx = x * Cos - y * Sin;
-            double ry = x * Sin + y * Cos;
-            double rz = z;
+        public XY TransformVector(XY vector)
+        {
+            double x = vector.X * M11 + vector.Y * M21;
+            double y = vector.X * M12 + vector.Y * M22;
+            return new XY(x, y);
+        }
 
-            return new XYZ(rx, ry, rz);
+        public Transformation Combine(Transformation other)
+        {
+            return new Transformation(
+                M11 * other.M11 + M12 * other.M21,
+                M11 * other.M12 + M12 * other.M22,
+                M21 * other.M11 + M22 * other.M21,
+                M21 * other.M12 + M22 * other.M22,
+                M31 * other.M11 + M32 * other.M21 + other.M31,
+                M31 * other.M12 + M32 * other.M22 + other.M32,
+                ScaleZ * other.ScaleZ,
+                TranslateZ * other.ScaleZ + other.TranslateZ
+            );
         }
     }
 }

@@ -19,7 +19,7 @@ namespace DwgToPngConverter.Renderers
         protected override void Draw(RenderContext context, Spline spline)
         {
             double length = ApproximateLength(spline);
-            int precision = (int)Math.Ceiling(length / PrecisionUnitLength);
+            int precision = (int)Math.Ceiling(length * context.TransformationScale / PrecisionUnitLength);
             if (precision < MinPrecision) precision = MinPrecision;
             if (precision > MaxPrecision) precision = MaxPrecision;
 

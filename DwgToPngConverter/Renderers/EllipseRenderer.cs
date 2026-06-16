@@ -27,7 +27,7 @@ namespace DwgToPngConverter.Renderers
                 sweep = Math.Tau;
             }
 
-            double approxCircumference = Math.PI * (majorLen + minorLen) * (sweep / Math.Tau);
+            double approxCircumference = Math.PI * (majorLen + minorLen) * (sweep / Math.Tau) * context.TransformationScale;
             int precision = (int)Math.Ceiling(approxCircumference / PrecisionUnitLength);
             precision = Math.Clamp(precision, MinPrecision, MaxPrecision);
 
