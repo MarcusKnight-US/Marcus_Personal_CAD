@@ -6,42 +6,42 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 18988
-Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\plot_screening_and_fill_patterns.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\plot_screening_and_fill_patterns.png --debug
-Start Time                 : 2026-06-09 16:10:37
-Total Process Run Time     : 264.30 ms
+Process ID (PID)           : 71204
+Executable Path            : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter
+Command Line Arguments     : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter.dll /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/plot_screening_and_fill_patterns.dwg /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/plot_screening_and_fill_patterns.png --debug
+Start Time                 : 2026-06-15 21:45:44
+Total Process Run Time     : 1534.25 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
 --------------------------------------------------------------------------------
-Operating System           : Microsoft Windows 10.0.26200
+Operating System           : Pop!_OS 24.04 LTS
 OS Architecture            : X64
 Process Architecture       : X64
-Runtime Version            : .NET 10.0.8
-Machine Name               : FLACS2
-User Name                  : BRG
-Logical Processor Count    : 32
+Runtime Version            : .NET 10.0.9
+Machine Name               : pop-os
+User Name                  : marcusknight
+Logical Processor Count    : 8
 
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.2656250 (User: 00:00:00.2500000, Privileged: 00:00:00.0156250)
-Peak Physical Memory (WS)  : 64.32 MB (67,444,736 bytes)
-Current Physical Memory    : 53.06 MB (55,640,064 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,476,942,336 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,464,441,344 bytes)
-Private Memory Size        : 20.30 MB (21,286,912 bytes)
-Managed GC Heap Size       : 7.59 MB (7,953,712 bytes)
-Active Process Threads     : 8
+Total CPU Processor Time   : 00:00:01.6328830 (User: 00:00:01.5281230, Privileged: 00:00:00.1050770)
+Peak Physical Memory (WS)  : 85.32 MB (89,460,736 bytes)
+Current Physical Memory    : 72.51 MB (76,029,952 bytes)
+Peak Virtual Memory        : 129.07 GB (138,587,615,232 bytes)
+Current Virtual Memory     : 129.06 GB (138,573,414,400 bytes)
+Private Memory Size        : 95.43 MB (100,065,280 bytes)
+Managed GC Heap Size       : 7.66 MB (8,027,128 bytes)
+Active Process Threads     : 10
 Garbage Collections        : Gen 0: 0, Gen 1: 0, Gen 2: 0
 
 --------------------------------------------------------------------------------
 4. DRAWING & CONVERSION METRICS
 --------------------------------------------------------------------------------
-Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\plot_screening_and_fill_patterns.dwg
+Input DWG File Path        : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/plot_screening_and_fill_patterns.dwg
 Input DWG File Size        : 83.94 KB (85,952 bytes)
-Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\plot_screening_and_fill_patterns.png
+Output PNG File Path       : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/plot_screening_and_fill_patterns.png
 Selected Layout            : 'Fill Patterns'
 Target Canvas Resolution   : 2200 x 1649 px
 Bounding Box Extents       :
@@ -68,10 +68,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 123.57 ms
-Layout Selection           : 2.29 ms
-Scene Processing & Render  : 125.24 ms
-Total Summed Steps Time    : 251.11 ms
+DWG Loading & Parsing      : 722.84 ms
+Layout Selection           : 14.96 ms
+Scene Processing & Render  : 723.08 ms
+Total Summed Steps Time    : 1460.88 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -84,19 +84,19 @@ Total Summed Steps Time    : 251.11 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-TextEntity                | 108      |             11.733 |           0.109
-Viewport                  | 2        |              0.411 |           0.205
-Solid                     | 520      |              0.064 |           0.000
+TextEntity                | 108      |             56.101 |           0.519
+Viewport                  | 2        |              2.521 |           1.260
+Solid                     | 520      |              0.876 |           0.002
 ------------------------------------------------------------------------
-TOTAL                     | 630      |             12.208 |           0.019
+TOTAL                     | 630      |             59.498 |           0.094
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-TextEntity                | 59       |              4.313 |           0.073
-Solid                     | 264      |              2.179 |           0.008
-Viewport                  | 1        |              0.703 |           0.703
+TextEntity                | 59       |             44.541 |           0.755
+Solid                     | 264      |             13.637 |           0.052
+Viewport                  | 1        |              5.836 |           5.836
 ------------------------------------------------------------------------
-TOTAL                     | 324      |              7.195 |           0.022
+TOTAL                     | 324      |             64.014 |           0.198
 =========================================================================
 

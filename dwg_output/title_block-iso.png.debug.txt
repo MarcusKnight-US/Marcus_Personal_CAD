@@ -6,42 +6,42 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 39052
-Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\title_block-iso.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\title_block-iso.png --debug
-Start Time                 : 2026-06-09 16:10:41
-Total Process Run Time     : 224.39 ms
+Process ID (PID)           : 71344
+Executable Path            : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter
+Command Line Arguments     : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter.dll /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/title_block-iso.dwg /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/title_block-iso.png --debug
+Start Time                 : 2026-06-15 21:46:03
+Total Process Run Time     : 1296.68 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
 --------------------------------------------------------------------------------
-Operating System           : Microsoft Windows 10.0.26200
+Operating System           : Pop!_OS 24.04 LTS
 OS Architecture            : X64
 Process Architecture       : X64
-Runtime Version            : .NET 10.0.8
-Machine Name               : FLACS2
-User Name                  : BRG
-Logical Processor Count    : 32
+Runtime Version            : .NET 10.0.9
+Machine Name               : pop-os
+User Name                  : marcusknight
+Logical Processor Count    : 8
 
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.2031250 (User: 00:00:00.1718750, Privileged: 00:00:00.0312500)
-Peak Physical Memory (WS)  : 54.23 MB (56,864,768 bytes)
-Current Physical Memory    : 52.95 MB (55,525,376 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,466,649,088 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,464,519,168 bytes)
-Private Memory Size        : 20.06 MB (21,032,960 bytes)
-Managed GC Heap Size       : 7.17 MB (7,518,032 bytes)
-Active Process Threads     : 8
+Total CPU Processor Time   : 00:00:01.3842490 (User: 00:00:01.3024460, Privileged: 00:00:00.0820390)
+Peak Physical Memory (WS)  : 74.59 MB (78,213,120 bytes)
+Current Physical Memory    : 71.61 MB (75,083,776 bytes)
+Peak Virtual Memory        : 129.06 GB (138,577,072,128 bytes)
+Current Virtual Memory     : 129.06 GB (138,573,385,728 bytes)
+Private Memory Size        : 94.79 MB (99,397,632 bytes)
+Managed GC Heap Size       : 7.24 MB (7,593,264 bytes)
+Active Process Threads     : 10
 Garbage Collections        : Gen 0: 0, Gen 1: 0, Gen 2: 0
 
 --------------------------------------------------------------------------------
 4. DRAWING & CONVERSION METRICS
 --------------------------------------------------------------------------------
-Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\title_block-iso.dwg
+Input DWG File Path        : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/title_block-iso.dwg
 Input DWG File Size        : 125.23 KB (128,233 bytes)
-Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\title_block-iso.png
+Output PNG File Path       : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/title_block-iso.png
 Selected Layout            : 'Model'
 Target Canvas Resolution   : 1000 x 1000 px
 Bounding Box Extents       :
@@ -67,10 +67,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 133.27 ms
-Layout Selection           : 2.20 ms
-Scene Processing & Render  : 75.91 ms
-Total Summed Steps Time    : 211.38 ms
+DWG Loading & Parsing      : 759.87 ms
+Layout Selection           : 14.48 ms
+Scene Processing & Render  : 449.48 ms
+Total Summed Steps Time    : 1223.83 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -83,19 +83,19 @@ Total Summed Steps Time    : 211.38 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-TextEntity                | 10       |             11.287 |           1.129
-LwPolyline                | 15       |              1.188 |           0.079
-Line                      | 4        |              0.001 |           0.000
+TextEntity                | 10       |             54.709 |           5.471
+LwPolyline                | 15       |              6.179 |           0.412
+Line                      | 4        |              0.005 |           0.001
 ------------------------------------------------------------------------
-TOTAL                     | 29       |             12.476 |           0.430
+TOTAL                     | 29       |             60.892 |           2.100
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-TextEntity                | 10       |              3.012 |           0.301
-LwPolyline                | 15       |              2.313 |           0.154
-Line                      | 4        |              0.177 |           0.044
+TextEntity                | 10       |             37.985 |           3.798
+LwPolyline                | 15       |             14.515 |           0.968
+Line                      | 4        |              1.108 |           0.277
 ------------------------------------------------------------------------
-TOTAL                     | 29       |              5.502 |           0.190
+TOTAL                     | 29       |             53.608 |           1.849
 =========================================================================
 

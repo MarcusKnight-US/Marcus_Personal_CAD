@@ -6,42 +6,42 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 15224
-Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\blocks_and_tables_-_metric.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\blocks_and_tables_-_metric.png --debug
-Start Time                 : 2026-06-09 16:10:30
-Total Process Run Time     : 895.74 ms
+Process ID (PID)           : 70940
+Executable Path            : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter
+Command Line Arguments     : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter.dll /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/blocks_and_tables_-_metric.dwg /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/blocks_and_tables_-_metric.png --debug
+Start Time                 : 2026-06-15 21:45:08
+Total Process Run Time     : 4929.58 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
 --------------------------------------------------------------------------------
-Operating System           : Microsoft Windows 10.0.26200
+Operating System           : Pop!_OS 24.04 LTS
 OS Architecture            : X64
 Process Architecture       : X64
-Runtime Version            : .NET 10.0.8
-Machine Name               : FLACS2
-User Name                  : BRG
-Logical Processor Count    : 32
+Runtime Version            : .NET 10.0.9
+Machine Name               : pop-os
+User Name                  : marcusknight
+Logical Processor Count    : 8
 
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.8906250 (User: 00:00:00.8125000, Privileged: 00:00:00.0781250)
-Peak Physical Memory (WS)  : 198.32 MB (207,953,920 bytes)
-Current Physical Memory    : 73.52 MB (77,086,720 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,604,291,072 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,473,579,520 bytes)
-Private Memory Size        : 39.26 MB (41,168,896 bytes)
-Managed GC Heap Size       : 22.63 MB (23,731,984 bytes)
-Active Process Threads     : 8
-Garbage Collections        : Gen 0: 1, Gen 1: 0, Gen 2: 0
+Total CPU Processor Time   : 00:00:04.9971210 (User: 00:00:04.8434190, Privileged: 00:00:00.1540030)
+Peak Physical Memory (WS)  : 217.88 MB (228,466,688 bytes)
+Current Physical Memory    : 90.75 MB (95,162,368 bytes)
+Peak Virtual Memory        : 129.18 GB (138,708,455,424 bytes)
+Current Virtual Memory     : 129.06 GB (138,574,286,848 bytes)
+Private Memory Size        : 112.27 MB (117,719,040 bytes)
+Managed GC Heap Size       : 15.53 MB (16,283,584 bytes)
+Active Process Threads     : 10
+Garbage Collections        : Gen 0: 3, Gen 1: 1, Gen 2: 0
 
 --------------------------------------------------------------------------------
 4. DRAWING & CONVERSION METRICS
 --------------------------------------------------------------------------------
-Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\blocks_and_tables_-_metric.dwg
+Input DWG File Path        : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/blocks_and_tables_-_metric.dwg
 Input DWG File Size        : 252.78 KB (258,848 bytes)
-Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\blocks_and_tables_-_metric.png
+Output PNG File Path       : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/blocks_and_tables_-_metric.png
 Selected Layout            : 'ISO A1'
 Target Canvas Resolution   : 6622 x 4964 px
 Bounding Box Extents       :
@@ -78,10 +78,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 174.22 ms
-Layout Selection           : 2.13 ms
-Scene Processing & Render  : 706.54 ms
-Total Summed Steps Time    : 882.90 ms
+DWG Loading & Parsing      : 840.74 ms
+Layout Selection           : 11.63 ms
+Scene Processing & Render  : 4014.22 ms
+Total Summed Steps Time    : 4866.59 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -94,31 +94,31 @@ Total Summed Steps Time    : 882.90 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-MText                     | 169      |             12.584 |           0.074
-LwPolyline                | 170      |              1.120 |           0.007
-Viewport                  | 3        |              0.458 |           0.153
-Hatch                     | 1        |              0.411 |           0.411
-Arc                       | 157      |              0.202 |           0.001
-TextEntity                | 466      |              0.134 |           0.000
-Line                      | 1262     |              0.093 |           0.000
-Point                     | 1        |              0.013 |           0.013
-Circle                    | 196      |              0.011 |           0.000
+MText                     | 169      |             49.847 |           0.295
+LwPolyline                | 170      |              3.607 |           0.021
+Viewport                  | 3        |              2.012 |           0.671
+Hatch                     | 1        |              1.725 |           1.725
+TextEntity                | 466      |              0.945 |           0.002
+Arc                       | 157      |              0.869 |           0.006
+Line                      | 1262     |              0.675 |           0.001
+Point                     | 1        |              0.082 |           0.082
+Circle                    | 196      |              0.040 |           0.000
 ------------------------------------------------------------------------
-TOTAL                     | 2425     |             15.024 |           0.006
+TOTAL                     | 2425     |             59.801 |           0.025
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-MText                     | 178      |              6.828 |           0.038
-TextEntity                | 891      |              4.611 |           0.005
-Line                      | 2121     |              2.882 |           0.001
-LwPolyline                | 294      |              2.626 |           0.009
-Hatch                     | 1        |              1.363 |           1.363
-Viewport                  | 1        |              0.783 |           0.783
-Arc                       | 314      |              0.763 |           0.002
-Circle                    | 390      |              0.635 |           0.002
-Point                     | 1        |              0.130 |           0.130
+MText                     | 178      |             61.586 |           0.346
+TextEntity                | 891      |             40.849 |           0.046
+Line                      | 2121     |             19.291 |           0.009
+LwPolyline                | 294      |             13.923 |           0.047
+Hatch                     | 1        |              5.990 |           5.990
+Viewport                  | 1        |              5.985 |           5.985
+Arc                       | 314      |              5.151 |           0.016
+Circle                    | 390      |              5.031 |           0.013
+Point                     | 1        |              0.527 |           0.527
 ------------------------------------------------------------------------
-TOTAL                     | 4191     |             20.621 |           0.005
+TOTAL                     | 4191     |            158.333 |           0.038
 =========================================================================
 

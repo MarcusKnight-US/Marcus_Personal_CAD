@@ -6,42 +6,42 @@
 1. PROCESS INFORMATION
 --------------------------------------------------------------------------------
 Process Name               : DwgToPngConverter
-Process ID (PID)           : 40892
-Executable Path            : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.exe
-Command Line Arguments     : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\DwgToPngConverter\bin\Debug\net10.0\DwgToPngConverter.dll C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\architectural_example-imperial.dwg C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\architectural_example-imperial.png --debug
-Start Time                 : 2026-06-09 16:10:26
-Total Process Run Time     : 244.83 ms
+Process ID (PID)           : 70822
+Executable Path            : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter
+Command Line Arguments     : /home/marcusknight/Desktop/Marcus_Personal_CAD/DwgToPngConverter/bin/Debug/net10.0/DwgToPngConverter.dll /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/architectural_example-imperial.dwg /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/architectural_example-imperial.png --debug
+Start Time                 : 2026-06-15 21:44:54
+Total Process Run Time     : 1391.62 ms
 
 --------------------------------------------------------------------------------
 2. SYSTEM & RUNTIME INFORMATION
 --------------------------------------------------------------------------------
-Operating System           : Microsoft Windows 10.0.26200
+Operating System           : Pop!_OS 24.04 LTS
 OS Architecture            : X64
 Process Architecture       : X64
-Runtime Version            : .NET 10.0.8
-Machine Name               : FLACS2
-User Name                  : BRG
-Logical Processor Count    : 32
+Runtime Version            : .NET 10.0.9
+Machine Name               : pop-os
+User Name                  : marcusknight
+Logical Processor Count    : 8
 
 --------------------------------------------------------------------------------
 3. PROCESS RESOURCE & CODE EFFICIENCY METRICS
 --------------------------------------------------------------------------------
-Total CPU Processor Time   : 00:00:00.2812500 (User: 00:00:00.2187500, Privileged: 00:00:00.0625000)
-Peak Physical Memory (WS)  : 57.81 MB (60,616,704 bytes)
-Current Physical Memory    : 51.14 MB (53,628,928 bytes)
-Peak Virtual Memory        : 2.07 TB (2,272,461,430,784 bytes)
-Current Virtual Memory     : 2.07 TB (2,272,453,677,056 bytes)
-Private Memory Size        : 19.55 MB (20,504,576 bytes)
-Managed GC Heap Size       : 7.04 MB (7,385,168 bytes)
-Active Process Threads     : 8
+Total CPU Processor Time   : 00:00:01.4946710 (User: 00:00:01.3959040, Privileged: 00:00:00.0989930)
+Peak Physical Memory (WS)  : 78.81 MB (82,636,800 bytes)
+Current Physical Memory    : 70.49 MB (73,916,416 bytes)
+Peak Virtual Memory        : 129.06 GB (138,581,233,664 bytes)
+Current Virtual Memory     : 129.06 GB (138,571,808,768 bytes)
+Private Memory Size        : 94.45 MB (99,033,088 bytes)
+Managed GC Heap Size       : 7.09 MB (7,438,128 bytes)
+Active Process Threads     : 10
 Garbage Collections        : Gen 0: 0, Gen 1: 0, Gen 2: 0
 
 --------------------------------------------------------------------------------
 4. DRAWING & CONVERSION METRICS
 --------------------------------------------------------------------------------
-Input DWG File Path        : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_examples\architectural_example-imperial.dwg
+Input DWG File Path        : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_examples/architectural_example-imperial.dwg
 Input DWG File Size        : 145.15 KB (148,638 bytes)
-Output PNG File Path       : C:\Users\BRG\Desktop\DWGtoPNG\Marcus_Personal_CAD\dwg_output\architectural_example-imperial.png
+Output PNG File Path       : /home/marcusknight/Desktop/Marcus_Personal_CAD/dwg_output/architectural_example-imperial.png
 Selected Layout            : 'Layout1'
 Target Canvas Resolution   : 2200 x 1106 px
 Bounding Box Extents       :
@@ -68,10 +68,10 @@ Breakdown by Entity Type:
 --------------------------------------------------------------------------------
 6. STAGE-WISE TIMING METRICS (WALL CLOCK TIME)
 --------------------------------------------------------------------------------
-DWG Loading & Parsing      : 138.98 ms
-Layout Selection           : 2.41 ms
-Scene Processing & Render  : 90.06 ms
-Total Summed Steps Time    : 231.45 ms
+DWG Loading & Parsing      : 787.25 ms
+Layout Selection           : 14.84 ms
+Scene Processing & Render  : 515.55 ms
+Total Summed Steps Time    : 1317.64 ms
 
 --------------------------------------------------------------------------------
 7. DETAILED PERFORMANCE PROFILE (BY ENTITY TYPE)
@@ -84,21 +84,21 @@ Total Summed Steps Time    : 231.45 ms
 --- Bounding Box & Extents Calculations (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-Viewport                  | 2        |              0.419 |           0.209
-Arc                       | 8        |              0.302 |           0.038
-LwPolyline                | 8        |              0.282 |           0.035
-Line                      | 108      |              0.058 |           0.001
+Viewport                  | 2        |              2.670 |           1.335
+Arc                       | 8        |              1.784 |           0.223
+LwPolyline                | 8        |              1.672 |           0.209
+Line                      | 108      |              0.415 |           0.004
 ------------------------------------------------------------------------
-TOTAL                     | 126      |              1.061 |           0.008
+TOTAL                     | 126      |              6.540 |           0.052
 
 --- Entity Rendering & Drawing (by Entity Type) ---
 Entity Type               | Count    | Total Time (ms)    | Avg Time (ms)  
 ------------------------------------------------------------------------
-Line                      | 54       |              1.615 |           0.030
-Viewport                  | 1        |              0.721 |           0.721
-LwPolyline                | 4        |              0.669 |           0.167
-Arc                       | 4        |              0.205 |           0.051
+Line                      | 54       |             10.945 |           0.203
+Viewport                  | 1        |              5.801 |           5.801
+LwPolyline                | 4        |              3.969 |           0.992
+Arc                       | 4        |              1.026 |           0.257
 ------------------------------------------------------------------------
-TOTAL                     | 63       |              3.210 |           0.051
+TOTAL                     | 63       |             21.741 |           0.345
 =========================================================================
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,6 +11,7 @@
     <PackageReference Include="ACadSharp" Version="3.6.12" />
     <PackageReference Include="ACadSharp.Image" Version="0.1.2" />
     <PackageReference Include="SkiaSharp" Version="3.119.2" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
   </ItemGroup>
 
 </Project>

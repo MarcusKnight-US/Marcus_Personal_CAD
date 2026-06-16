@@ -642,10 +642,6 @@ namespace DwgToPngConverter.Renderers
         private static SKPathEffect? CreatePathEffect(Entity entity, float scale)
         {
             var ltype = ResolveLineType(entity);
-            if (ltype == null)
-            {
-                return null;
-            }
             return DashedPathEffect;
         }
     }

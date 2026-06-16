@@ -58,3 +58,5 @@ $RECYCLE.BIN/
 
 run_output.txt
 .VSCodeCounter/
+dwg_examples/
+dwg_output/
