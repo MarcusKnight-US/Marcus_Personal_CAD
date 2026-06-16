@@ -1,6 +1,7 @@
 namespace DwgToPngConverter.Geometry
 {
     using System;
+    using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using CSMath;
     using ACadSharp.Entities;
@@ -9,18 +10,44 @@ namespace DwgToPngConverter.Geometry
     {
         private static readonly double[] CardinalAngles = new[] { 0.0, Math.PI / 2.0, Math.PI, Math.PI * 3.0 / 2.0 };
 
+        [ThreadStatic]
+        private static Dictionary<Entity, (bool Success, Extents Extents)>? _cache;
+
+        private static Dictionary<Entity, (bool Success, Extents Extents)> Cache => _cache ??= new(ReferenceEqualityComparer.Instance);
+
+        public static void ClearCache()
+        {
+            _cache?.Clear();
+        }
+
         // TryGetExtents computes min/max bounds for supported entity types.
         public static bool TryGetExtents(Entity entity, out Extents extents)
         {
-            if (entity == null || entity.IsInvisible)
+            if (entity == null)
             {
                 extents = default;
                 return false;
             }
+
+            if (Cache.TryGetValue(entity, out var cached))
+            {
+                extents = cached.Extents;
+                return cached.Success;
+            }
+
+            if (entity.IsInvisible)
+            {
+                extents = default;
+                Cache[entity] = (false, extents);
+                return false;
+            }
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool result = TryGetExtentsInternal(entity, out extents);
             sw.Stop();
             PerformanceTracker.RecordExtents(entity.GetType().Name, sw.Elapsed.TotalMilliseconds);
+
+            Cache[entity] = (result, extents);
             return result;
         }
 

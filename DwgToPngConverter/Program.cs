@@ -382,6 +382,7 @@ class Program
     private static void Render(CadDocument doc, ACadSharp.Objects.Layout? layout,
         string inputPath, string outputPath, string bgColor, ConversionDebugInfo? debugInfo = null)
     {
+        ExtentsCalculator.ClearCache();
         var renderer = new MasterRenderer();
         renderer.BackgroundColorHex = bgColor;
 
